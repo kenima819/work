@@ -1,0 +1,148 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教材ファイル一覧 (自動更新)</title>
+    <!-- Tailwind CSS for clean professional styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between py-10 px-4">
+
+    <!-- Main Container -->
+    <main class="max-w-xl w-full mx-auto bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-100">
+        
+        <!-- Header -->
+        <div class="border-b border-slate-100 pb-4 mb-6">
+            <h1 class="font-bold text-xl sm:text-2xl text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-folder-open text-indigo-600"></i>
+                <span>ビジネス英語教材一覧</span>
+            </h1>
+            <p class="text-xs text-slate-400 mt-1">※新しいHTMLファイルをアップロードすると自動でここに追加されます</p>
+        </div>
+
+        <!-- Dynamic File List Container -->
+        <div>
+            <!-- Loading indicator -->
+            <div id="loading" class="py-12 flex flex-col items-center justify-center space-y-3">
+                <div class="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-xs text-slate-400 font-medium">GitHubから最新のファイルリストを取得中...</p>
+            </div>
+
+            <!-- Main List -->
+            <ul id="fileList" class="space-y-3 hidden">
+                <!-- Dynamically populated via JS -->
+            </ul>
+
+            <!-- Empty / Error Fallback State -->
+            <div id="fallbackState" class="hidden py-6 text-center">
+                <div class="bg-amber-50 text-amber-800 p-4 rounded-xl border border-amber-200 text-xs text-left mb-4">
+                    <p class="font-bold mb-1"><i class="fa-solid fa-circle-exclamation"></i> 自動取得が制限されました</p>
+                    <p class="leading-relaxed">
+                        GitHubのアクセス回数制限（1時間あたりのAPI制限）に達したか、通信エラーが発生しました。時間をおいて開き直すか、以下の手動リンクからアクセスしてください。
+                    </p>
+                </div>
+                <!-- Hardcoded quick links just in case -->
+                <ul class="space-y-3">
+                    <li>
+                        <a href="kindoku_Ex001.html" class="flex items-center justify-between p-4 bg-slate-50 hover:bg-indigo-50/50 rounded-xl border border-slate-200/50 font-bold text-sm text-indigo-600 transition-all">
+                            <span>?? 問題1: 出張旅費の精算 (kindoku_Ex001.html)</span>
+                            <i class="fa-solid fa-chevron-right text-xs opacity-50"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="ex002.html" class="flex items-center justify-between p-4 bg-slate-50 hover:bg-indigo-50/50 rounded-xl border border-slate-200/50 font-bold text-sm text-indigo-600 transition-all">
+                            <span>?? 問題2: チラシのフィードバック会話 (ex002.html)</span>
+                            <i class="fa-solid fa-chevron-right text-xs opacity-50"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center text-xs text-slate-400 mt-8">
+        c 2026 Business English Dynamic Portal. Powered by GitHub API.
+    </footer>
+
+    <script>
+        // Configuration
+        const githubUser = "kenima819";
+        const githubRepo = "work";
+
+        async function fetchFileList() {
+            const listElement = document.getElementById('fileList');
+            const loadingElement = document.getElementById('loading');
+            const fallbackElement = document.getElementById('fallbackState');
+
+            try {
+                // Fetch files from repo root folder
+                const response = await fetch(`https://api.github.com/repos/${githubUser}/${githubRepo}/contents/`);
+                
+                if (!response.ok) {
+                    throw new Error("API_LIMIT_OR_NOT_FOUND");
+                }
+
+                const data = await response.json();
+
+                // Filter for HTML files, excluding 'index.html' itself
+                const htmlFiles = data.filter(file => 
+                    file.type === 'file' && 
+                    file.name.toLowerCase().endsWith('.html') && 
+                    file.name.toLowerCase() !== 'index.html'
+                );
+
+                if (htmlFiles.length === 0) {
+                    loadingElement.classList.add('hidden');
+                    fallbackElement.classList.remove('hidden');
+                    return;
+                }
+
+                // Render dynamic file items
+                listElement.innerHTML = '';
+                htmlFiles.forEach(file => {
+                    const li = document.createElement('li');
+                    
+                    // Format file names beautifully (e.g., kindoku_Ex001.html -> Ex001: 出張精算 またはファイル名)
+                    let displayName = file.name;
+                    if (file.name === 'kindoku_Ex001.html') {
+                        displayName = "?? 問題1: 出張旅費の精算 (kindoku_Ex001.html)";
+                    } else if (file.name === 'ex002.html') {
+                        displayName = "?? 問題2: チラシのフィードバック会話 (ex002.html)";
+                    } else {
+                        displayName = `?? ${file.name}`;
+                    }
+
+                    li.innerHTML = `
+                        <a href="${file.name}" class="flex items-center justify-between p-4 bg-white hover:bg-indigo-50/50 rounded-xl border border-slate-200/60 shadow-sm font-bold text-sm text-indigo-600 transition-all active:scale-95">
+                            <span>${displayName}</span>
+                            <i class="fa-solid fa-chevron-right text-xs text-indigo-400"></i>
+                        </a>
+                    `;
+                    listElement.appendChild(li);
+                });
+
+                // Toggle visibility states
+                loadingElement.classList.add('hidden');
+                listElement.classList.remove('hidden');
+
+            } catch (error) {
+                console.warn("GitHub API limit or error, falling back to static links.", error);
+                loadingElement.classList.add('hidden');
+                fallbackElement.classList.remove('hidden');
+            }
+        }
+
+        // Init load
+        window.onload = fetchFileList;
+    </script>
+</body>
+</html>
