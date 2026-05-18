@@ -1,0 +1,124 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business English Study Portal</title>
+    <!-- Tailwind CSS for modern design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300">
+
+    <!-- Header -->
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 text-white p-2.5 rounded-xl flex items-center justify-center shadow-md">
+                    <i class="fa-solid fa-graduation-cap text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg sm:text-xl leading-tight">Business English Portal</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">ビジネス英語シャドーイング教材ポータル</p>
+                </div>
+            </div>
+            <!-- Theme Toggle -->
+            <button id="themeToggle" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-all shadow-sm">
+                <i class="fa-solid fa-moon dark:hidden"></i>
+                <i class="fa-solid fa-sun hidden dark:block"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col justify-center">
+        
+        <div class="text-center max-w-2xl mx-auto mb-10">
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white leading-tight mb-3">
+                教材を選択して学習を始めましょう
+            </h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                再生速度の調整（0.5倍速?）や、マイク録音による発音セルフチェック機能をフル活用して、何度もシャドーイングを練習できます。
+            </p>
+        </div>
+
+        <!-- Problem Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto w-full">
+            
+            <!-- Lesson 1 Card -->
+            <a href="kindoku_Ex001.html" class="group bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md border border-slate-200/60 dark:border-slate-700 hover:border-indigo-500 dark:hover:border-indigo-500 transition-all duration-300 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400">
+                            No. 1 (メール)
+                        </span>
+                        <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
+                            <i class="fa-solid fa-envelope text-lg"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        出張旅費の精算手続き
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
+                        Tony WilsonからMs. Parkへ宛てた、出張経費精算ルール変更の社内通知メールです。やんわりと改善を促すスマートな表現を学びます。
+                    </p>
+                </div>
+                <div class="flex items-center text-xs font-bold text-indigo-600 dark:text-indigo-400 mt-4">
+                    <span>学習を開始する</span>
+                    <i class="fa-solid fa-arrow-right ml-1.5 transform group-hover:translate-x-1 transition-transform"></i>
+                </div>
+            </a>
+
+            <!-- Lesson 2 Card -->
+            <a href="ex002.html" class="group bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md border border-slate-200/60 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-500 transition-all duration-300 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
+                            No. 2 (会話)
+                        </span>
+                        <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
+                            <i class="fa-solid fa-comments text-lg"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                        チラシの修正フィードバック
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
+                        Maria WoodsとDavid Choによる、チラシデザイン案へのフィードバック会話です。相手に修正を依頼する際の英語表現を学びます。
+                    </p>
+                </div>
+                <div class="flex items-center text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-4">
+                    <span>学習を開始する</span>
+                    <i class="fa-solid fa-arrow-right ml-1.5 transform group-hover:translate-x-1 transition-transform"></i>
+                </div>
+            </a>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700/50 py-6 text-center text-xs text-slate-400 dark:text-slate-500 transition-colors">
+        c 2026 Business English Study Portal. All Rights Reserved.
+    </footer>
+
+    <script>
+        // Simple theme toggle controller
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+        });
+
+        // Initialize user-preferred color scheme
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+</body>
+</html>
