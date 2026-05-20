@@ -1,0 +1,504 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ビジネス英語音読トレーナー - Ex005</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .highlight { background-color: #fef08a; border-bottom: 2px solid #eab308; }
+        .playing-row { background-color: #f0fdf4; border-left: 4px solid #22c55e; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+    <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        <!-- ヘッダー -->
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-4 mb-6">
+            <div>
+                <span class="text-xs font-bold tracking-widest text-indigo-600 uppercase bg-indigo-50 px-2.5 py-1 rounded-md">Exercise 005</span>
+                <h1 class="text-2xl font-bold text-slate-900 mt-1">ミュージシャンから肉の巨匠へ</h1>
+            </div>
+            <div class="mt-2 sm:mt-0 text-sm text-slate-500 font-medium">
+                対象ファイル名: <code class="bg-slate-100 px-1.5 py-0.5 rounded text-indigo-600 font-mono text-xs">kindoku_Ex005.html</code>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- 左・中央エリア：音読メインコントロール -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- コントロールパネル -->
+                <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/60 space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <!-- 再生・停止 -->
+                        <div class="flex items-center gap-2">
+                            <button id="btnPlayAll" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl shadow-sm transition flex items-center gap-2">
+                                <span>[再生] 全文再生</span>
+                            </button>
+                            <button id="btnStop" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium rounded-xl transition">
+                                [停止]
+                            </button>
+                        </div>
+
+                        <!-- 音声タイプ（男性・女性）選択 -->
+                        <div class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200/40 min-w-[180px]">
+                            <label for="voiceSelect" class="text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Voice:</label>
+                            <select id="voiceSelect" class="bg-transparent font-semibold text-slate-700 focus:outline-none text-xs cursor-pointer w-full max-w-[200px]">
+                                <option value="">(音声読み込み中...)</option>
+                            </select>
+                        </div>
+
+                        <!-- モード切替 -->
+                        <div class="flex items-center gap-2">
+                            <label class="relative inline-flex items-center cursor-pointer select-none">
+                                <input type="checkbox" id="modeToggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                                <span class="ml-2 text-sm font-medium text-slate-700">1文ごとに自動停止</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 自由スピード調整スライダー -->
+                    <div class="bg-slate-50/70 p-4 rounded-xl border border-slate-200/40 flex flex-col sm:flex-row items-center gap-4">
+                        <div class="w-full flex items-center justify-between sm:w-auto gap-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Speed:</span>
+                            <span id="speedValue" class="text-sm font-mono font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">1.00x</span>
+                        </div>
+                        <input type="range" id="speedRange" min="0.5" max="2.0" step="0.05" value="1.0" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 focus:outline-none">
+                    </div>
+
+                    <!-- 録音・フィードバックパネル -->
+                    <div class="border-t border-slate-100 pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <button id="btnRecord" class="px-5 py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl shadow-md shadow-rose-100 transition flex items-center justify-center gap-2 min-w-[140px]">
+                                <span id="recIcon">●</span> <span id="recText">録音スタート</span>
+                            </button>
+                            <button id="btnPlayRec" disabled class="px-4 py-3 bg-slate-100 text-slate-400 font-medium rounded-xl transition flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed">
+                                [声再生] 自分の声を聴く
+                            </button>
+                        </div>
+                        <div id="recStatus" class="text-xs font-semibold text-slate-400 flex items-center gap-1.5 px-3 py-2 bg-slate-50 rounded-lg border border-slate-200/30">
+                            <span class="w-2 h-2 rounded-full bg-slate-300 block" id="statusDot"></span>
+                            <span id="statusText">マイク待機中</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 英文・日本文本体エリア -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
+                    <div class="p-4 bg-slate-50/80 border-b border-slate-100 flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-400 tracking-wider uppercase">Training Workspace</span>
+                        <span class="text-xs text-slate-500">文をクリックすると、その文だけをお手本再生できます</span>
+                    </div>
+                    
+                    <div id="scriptContainer" class="divide-y divide-slate-100">
+                        <!-- JavaScriptで動的生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右エリア：学習サポートサイドバー -->
+            <div class="space-y-6">
+                <!-- 背景知識とマナー -->
+                <div class="bg-gradient-to-br from-amber-50 to-orange-50/50 rounded-2xl p-5 border border-amber-200/60 shadow-sm">
+                    <h3 class="font-bold text-amber-900 flex items-center gap-1.5 text-base">
+                        ■ 今回の背景知識とマナー
+                    </h3>
+                    <ul class="mt-3 space-y-2.5 text-xs text-amber-900/80 leading-relaxed list-disc list-inside">
+                        <li><strong>backstory (背景にある話)</strong>: 単なる歴史（history）ではなく、「今に至るまでの、興味深い劇的な秘話」という意味合いを含んだ上品なビジネス単語です。</li>
+                        <li><strong>struck a chord with (心の琴線に触れた)</strong>: もともと音楽の「和音を鳴らす」から転じた表現で、ビジネスでも「地元の人の共感を呼んだ」「親しまれた」という意味で非常に良く使われます。</li>
+                        <li><strong>took unexpected turns (予想外の展開を見せる)</strong>: 「人生万事塞翁が馬」のように、物事の流れが予期せぬ方向へ大きく舵を切ることをエレガントに示す慣用句です。</li>
+                    </ul>
+                </div>
+
+                <!-- 重要ビジネス表現カード -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4">
+                    <h3 class="font-bold text-slate-900 flex items-center gap-1.5 text-base border-b border-slate-100 pb-2">
+                        ■ 重要ビジネス・広告表現
+                    </h3>
+                    
+                    <div class="space-y-3.5">
+                        <div class="group">
+                            <div class="text-xs font-mono text-indigo-600 font-bold">entrepreneurial success</div>
+                            <div class="text-sm font-bold text-slate-800 mt-0.5">起業家としての成功</div>
+                            <p class="text-xs text-slate-500 mt-1 leading-relaxed">「entrepreneur（起業家）」の形容詞形。新ビジネスを立ち上げ軌道に乗せるプロフェッショナルな取り組みを指します。</p>
+                        </div>
+                        
+                        <div class="group">
+                            <div class="text-xs font-mono text-indigo-600 font-bold">convert A into B</div>
+                            <div class="text-sm font-bold text-slate-800 mt-0.5">AをBへ変換・活用する</div>
+                            <p class="text-xs text-slate-500 mt-1 leading-relaxed">これまでに培った「創造的なエネルギー（creative energy）」を、調理やグルメといった別の分野に応用する際の名表現です。</p>
+                        </div>
+
+                        <div class="group">
+                            <div class="text-xs font-mono text-indigo-600 font-bold">gained a loyal following</div>
+                            <div class="text-sm font-bold text-slate-800 mt-0.5">根強いファン（常連客）を獲得する</div>
+                            <p class="text-xs text-slate-500 mt-1 leading-relaxed">小売店や飲食店が、一過性の流行ではなく、信頼によって固定客やファン層をしっかり掴んだときに使われる定番フレーズです。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 英文・日本語データ定義 ---
+        const speechData = [
+            {
+                en: "From Musician to Meat Maestro: A Journey of Entrepreneurial Success.",
+                ja: "ミュージシャンから肉の巨匠へ：起業家としての成功への道のり。"
+            },
+            {
+                en: "In the heart of Philadelphia, Amity Meats and Deli has an interesting backstory.",
+                ja: "フィラデルフィアの中心部にある「アミティ・ミーツ＆デリ」には、興味深い誕生秘話があります。"
+            },
+            {
+                en: "At the center of it is Julian Kowalski, a businessperson whose journey from the world of music to the realm of meat has struck a chord with locals.",
+                ja: "その中心にいるのは、音楽の世界から肉の領域へと転身した軌跡が、地元の常連客たちの共感を呼んでいる実業家、ジュリアン・コワルスキーです。"
+            },
+            {
+                en: "Julian used to be known for his incredible guitar skills.",
+                ja: "ジュリアンはかつて、その素晴らしいギターの腕前で有名でした。"
+            },
+            {
+                en: "A seasoned musician with two solo albums, he entertained audiences around town, and his songs regularly played on the radio.",
+                ja: "2枚のソロアルバムをリリースしているベテランミュージシャンとして、彼は街中で聴衆を魅了し、彼の曲は日常的にラジオで流れていました。"
+            },
+            {
+                en: "But life can take unexpected turns, and one day he found himself drawn to the culinary arts.",
+                ja: "しかし、人生には予期せぬ展開が待っているもので、ある日彼は料理の芸術に惹かれている自分に気づきました。"
+            },
+            {
+                en: "This curiosity evolved into a fascination with butchery.",
+                ja: "この好奇心は、やがて食肉解体・調製の技術（ブッチャリー）への強い興味へと進化していきました。"
+            },
+            {
+                en: "Julian's aunt, a chef at a popular restaurant in West Philly, told her nephew that he should get his butcher certification, and that's exactly what he did.",
+                ja: "ウエスト・フィラデルフィアの人気レストランのシェフを務めるジュリアンの叔母は、甥に「食肉処理の資格」を取るべきだと勧め、彼はまさにその通りに実行しました。"
+            },
+            {
+                en: "Julian mastered the techniques of preparation at Eldora College in his hometown of Baltimore, and he was able to convert his creative energy into something he could apply to gastronomy.",
+                ja: "ジュリアンは故郷のボルチモアにあるエルドラ・カレッジで下ごしらえの技術を習得し、自らのクリエイティブなエネルギーをガストロノミー（美食）に活かせる技能へと昇華させました。"
+            },
+            {
+                en: "He opened Amity Meats and Deli two years ago, offering a selection of premium cuts, house-made sausages, and other deli delights.",
+                ja: "彼は2年前に「アミティ・ミーツ＆デリ」をオープンし、厳選された上質な肉、自家製ソーセージ、その他のデリの逸品を提供しています。"
+            },
+            {
+                en: "Although it was not an immediate success, word got around, and the establishment soon gained a loyal following.",
+                ja: "開店してすぐに大成功したわけではありませんでしたが、口コミが広がり、店はすぐに多くの常連客（根強いファン）を獲得しました。"
+            },
+            {
+                en: "What sets Amity Meats and Deli apart is not just the quality of its products but also the unique customer experience.",
+                ja: "「アミティ・ミーツ＆デリ」が他と一線を画しているのは、商品の品質だけでなく、ユニークな顧客体験にもあります。"
+            },
+            {
+                en: "Patrons can learn about the various cuts and cooking styles, and they can order something off the deli menu and relax at one of the dozen tables.",
+                ja: "お客は肉の様々な部位や調理方法について学ぶことができ、デリのメニューから注文して、12卓ほどあるテーブル席でくつろぐことができます。"
+            },
+            {
+                en: "Meanwhile, they might occasionally hear something from the owner's previous career playing over the speakers in the background.",
+                ja: "その間、バックグラウンドのスピーカーからは、店主の以前のキャリア（音楽活動）時代の曲が時折流れてくるのを耳にするかもしれません。"
+            }
+        ];
+
+        // --- 状態管理変数 ---
+        const synth = window.speechSynthesis;
+        let currentUtterance = null;
+        let activeIndex = null;
+        let isLoopingAll = false;
+        let speechVoices = [];
+        
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let audioUrl = null;
+        let isRecording = false;
+
+        // --- DOM要素取得 ---
+        const scriptContainer = document.getElementById('scriptContainer');
+        const btnPlayAll = document.getElementById('btnPlayAll');
+        const btnStop = document.getElementById('btnStop');
+        const voiceSelect = document.getElementById('voiceSelect');
+        const speedRange = document.getElementById('speedRange');
+        const speedValue = document.getElementById('speedValue');
+        const modeToggle = document.getElementById('modeToggle');
+        
+        const btnRecord = document.getElementById('btnRecord');
+        const btnPlayRec = document.getElementById('btnPlayRec');
+        const recIcon = document.getElementById('recIcon');
+        const recText = document.getElementById('recText');
+        const recStatus = document.getElementById('recStatus');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+
+        // --- 音声リスト（男声・女声など）の取得と生成 ---
+        function loadVoices() {
+            if (!synth) return;
+            
+            const allVoices = synth.getVoices();
+            speechVoices = allVoices.filter(voice => voice.lang.startsWith('en'));
+            
+            if (speechVoices.length === 0) {
+                speechVoices = allVoices;
+            }
+
+            voiceSelect.innerHTML = '';
+            
+            if (speechVoices.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = "";
+                opt.textContent = "標準ブラウザ音声";
+                voiceSelect.appendChild(opt);
+                return;
+            }
+
+            speechVoices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                
+                let genderTag = "";
+                const nameLower = voice.name.toLowerCase();
+                if (nameLower.includes('david') || nameLower.includes('george') || nameLower.includes('male') || nameLower.includes('ravi') || nameLower.includes('mark') || nameLower.includes('daniel')) {
+                    genderTag = "[男声] ";
+                } else if (nameLower.includes('zira') || nameLower.includes('female') || nameLower.includes('hazel') || nameLower.includes('susan') || nameLower.includes('haruka') || nameLower.includes('lisa') || nameLower.includes('samantha')) {
+                    genderTag = "[女声] ";
+                } else {
+                    genderTag = "[音声] ";
+                }
+
+                const isDefault = voice.default ? " (推奨)" : "";
+                option.textContent = `${genderTag}${voice.name} (${voice.lang})${isDefault}`;
+                voiceSelect.appendChild(option);
+            });
+
+            const preferredIndex = speechVoices.findIndex(v => 
+                v.name.includes('Google US English') || 
+                v.name.includes('Zira') || 
+                v.name.includes('David') ||
+                v.name.includes('Samantha')
+            );
+            if (preferredIndex !== -1) {
+                voiceSelect.value = preferredIndex;
+            }
+        }
+
+        if (typeof synth !== 'undefined' && synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = loadVoices;
+        }
+
+        // --- 画面初期ビルド ---
+        function buildScriptUI() {
+            scriptContainer.innerHTML = '';
+            speechData.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.id = `row-${index}`;
+                row.className = "p-4 sm:p-5 transition-all duration-200 cursor-pointer hover:bg-slate-50/60 flex flex-col gap-1.5";
+                row.onclick = () => playSingleRow(index);
+
+                row.innerHTML = `
+                    <div class="text-xs font-bold text-slate-400 select-none">Sentence ${index + 1}</div>
+                    <div class="text-base sm:text-lg font-semibold text-slate-900 leading-relaxed tracking-wide" id="en-${index}">
+                        ${item.en}
+                    </div>
+                    <div class="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
+                        ${item.ja}
+                    </div>
+                `;
+                scriptContainer.appendChild(row);
+            });
+            loadVoices();
+        }
+
+        // --- 音声合成（TTS）処理 ---
+        function stopAudio() {
+            isLoopingAll = false;
+            synth.cancel();
+            if (currentUtterance) currentUtterance = null;
+            clearVisualHighlights();
+            btnPlayAll.innerHTML = "<span>[再生] 全文再生</span>";
+        }
+
+        function clearVisualHighlights() {
+            speechData.forEach((_, i) => {
+                const r = document.getElementById(`row-${i}`);
+                const e = document.getElementById(`en-${i}`);
+                if (r) r.classList.remove('playing-row');
+                if (e) e.classList.remove('highlight');
+            });
+            activeIndex = null;
+        }
+
+        function highlightRow(index) {
+            clearVisualHighlights();
+            activeIndex = index;
+            const row = document.getElementById(`row-${index}`);
+            const enText = document.getElementById(`en-${index}`);
+            if (row) row.classList.add('playing-row');
+            if (enText) enText.classList.add('highlight');
+            
+            row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function playSingleRow(index) {
+            stopAudio();
+            speakSequence(index, false);
+        }
+
+        function playAllFromStart() {
+            stopAudio();
+            isLoopingAll = true;
+            btnPlayAll.innerHTML = "<span>[一時停止中...]</span>";
+            speakSequence(0, true);
+        }
+
+        function speakSequence(index, continueNext = false) {
+            if (index >= speechData.length || !isLoopingAll && continueNext) {
+                stopAudio();
+                return;
+            }
+
+            highlightRow(index);
+            synth.cancel();
+
+            currentUtterance = new SpeechSynthesisUtterance(speechData[index].en);
+            
+            if (speechVoices.length > 0 && voiceSelect.value !== "") {
+                const selectedVoice = speechVoices[parseInt(voiceSelect.value)];
+                if (selectedVoice) {
+                    currentUtterance.voice = selectedVoice;
+                    currentUtterance.lang = selectedVoice.lang;
+                }
+            } else {
+                currentUtterance.lang = 'en-US';
+            }
+
+            currentUtterance.rate = parseFloat(speedRange.value);
+
+            currentUtterance.onend = () => {
+                if (continueNext && isLoopingAll) {
+                    const isStepMode = modeToggle.checked;
+                    if (isStepMode) {
+                        btnPlayAll.innerHTML = "<span>[再生] 全文再生</span>";
+                        isLoopingAll = false; 
+                    } else {
+                        speakSequence(index + 1, true);
+                    }
+                } else if (!continueNext) {
+                    clearVisualHighlights();
+                }
+            };
+
+            currentUtterance.onerror = () => {
+                clearVisualHighlights();
+            };
+
+            synth.speak(currentUtterance);
+        }
+
+        // --- マイク録音処理 ---
+        async function toggleRecording() {
+            if (!isRecording) {
+                audioChunks = [];
+                try {
+                    synth.cancel(); 
+                    
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    
+                    mediaRecorder.ondataavailable = (e) => {
+                        if (e.data.size > 0) audioChunks.push(e.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                        audioUrl = URL.createObjectURL(audioBlob);
+                        btnPlayRec.disabled = false;
+                        btnPlayRec.classList.remove('bg-slate-100', 'text-slate-400');
+                        btnPlayRec.classList.add('bg-indigo-100', 'text-indigo-700', 'hover:bg-indigo-200');
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    
+                    recIcon.textContent = "■";
+                    recText.textContent = "録音を停止";
+                    btnRecord.classList.replace('bg-rose-500', 'bg-slate-800');
+                    btnRecord.classList.replace('hover:bg-rose-600', 'hover:bg-slate-900');
+                    
+                    statusDot.classList.replace('bg-slate-300', 'bg-rose-500');
+                    statusDot.classList.add('animate-ping');
+                    statusText.textContent = "マイク録音中...";
+                    statusText.classList.add('text-rose-600');
+                } catch (err) {
+                    console.error("マイク接続エラー:", err);
+                    alert("マイクへのアクセスが拒否されたか、マイクが見つかりません。ブラウザの権限設定を確認してください。");
+                }
+            } else {
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                }
+                isRecording = false;
+                
+                recIcon.textContent = "●";
+                recText.textContent = "録音スタート";
+                btnRecord.classList.replace('bg-slate-800', 'bg-rose-500');
+                btnRecord.classList.replace('hover:bg-slate-900', 'hover:bg-rose-600');
+                
+                statusDot.classList.remove('animate-ping');
+                statusDot.classList.replace('bg-rose-500', 'bg-emerald-500');
+                statusText.textContent = "録音データ保存完了";
+                statusText.classList.replace('text-rose-600', 'text-emerald-600');
+            }
+        }
+
+        function playRecordedAudio() {
+            if (audioUrl) {
+                synth.cancel();
+                const audio = new Audio(audioUrl);
+                audio.play();
+            }
+        }
+
+        // --- イベントリスナー登録 ---
+        btnPlayAll.onclick = () => {
+            if (isLoopingAll) stopAudio();
+            else playAllFromStart();
+        };
+        btnStop.onclick = stopAudio;
+        btnRecord.onclick = toggleRecording;
+        btnPlayRec.onclick = playRecordedAudio;
+        
+        voiceSelect.onchange = () => {
+            if (activeIndex !== null && synth.speaking) {
+                const savedIndex = activeIndex;
+                const savedLoop = isLoopingAll;
+                stopAudio();
+                isLoopingAll = savedLoop;
+                if (savedLoop) btnPlayAll.innerHTML = "<span>[一時停止中...]</span>";
+                speakSequence(savedIndex, savedLoop);
+            }
+        };
+
+        speedRange.oninput = () => {
+            const currentSpeed = parseFloat(speedRange.value).toFixed(2);
+            speedValue.textContent = `${currentSpeed}x`;
+        };
+
+        speedRange.onchange = () => {
+            if (activeIndex !== null && synth.speaking) {
+                const savedIndex = activeIndex;
+                const savedLoop = isLoopingAll;
+                stopAudio();
+                isLoopingAll = savedLoop;
+                if (savedLoop) btnPlayAll.innerHTML = "<span>[一時停止中...]</span>";
+                speakSequence(savedIndex, savedLoop);
+            }
+        };
+
+        window.onload = buildScriptUI;
+    </script>
+</body>
+</html>
