@@ -1,0 +1,805 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ビジネス英語音読トレーナー - Ex007</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .highlight { background-color: #fef08a; border-bottom: 2px solid #eab308; }
+        .playing-row { background-color: #f0fdf4; border-left: 4px solid #22c55e; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+    <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        <!-- ヘッダー -->
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-4 mb-6">
+            <div>
+                <span class="text-xs font-bold tracking-widest text-indigo-600 uppercase bg-indigo-50 px-2.5 py-1 rounded-md">Exercise 007</span>
+                <h1 class="text-2xl font-bold text-slate-900 mt-1">中古自転車のクレームと対応メール</h1>
+            </div>
+            <div class="mt-2 sm:mt-0 text-sm text-slate-500 font-medium">
+                対象ファイル名: <code class="bg-slate-100 px-1.5 py-0.5 rounded text-indigo-600 font-mono text-xs">kindoku_Ex007.html</code>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- 左・中央エリア：音読メインコントロール -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- コントロールパネル -->
+                <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/60 space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <!-- 再生・停止 -->
+                        <div class="flex items-center gap-2">
+                            <button id="btnPlayAll" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl shadow-sm transition flex items-center gap-2">
+                                <span>[再生] 全文再生</span>
+                            </button>
+                            <button id="btnStop" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium rounded-xl transition">
+                                [停止]
+                            </button>
+                        </div>
+
+                        <!-- 音声タイプ（男性・女性）選択 -->
+                        <div class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200/40 min-w-[180px]">
+                            <label for="voiceSelect" class="text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Voice:</label>
+                            <select id="voiceSelect" class="bg-transparent font-semibold text-slate-700 focus:outline-none text-xs cursor-pointer w-full max-w-[200px]">
+                                <option value="">(音声読み込み中...)</option>
+                            </select>
+                        </div>
+
+                        <!-- モード切替 -->
+                        <div class="flex items-center gap-2">
+                            <label class="relative inline-flex items-center cursor-pointer select-none">
+                                <input type="checkbox" id="modeToggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                                <span class="ml-2 text-sm font-medium text-slate-700">1文ごとに自動停止</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 自由スピード調整スライダー -->
+                    <div class="bg-slate-50/70 p-4 rounded-xl border border-slate-200/40 flex flex-col sm:flex-row items-center gap-4">
+                        <div class="w-full flex items-center justify-between sm:w-auto gap-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Speed:</span>
+                            <span id="speedValue" class="text-sm font-mono font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">1.00x</span>
+                        </div>
+                        <input type="range" id="speedRange" min="0.5" max="2.0" step="0.05" value="1.0" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 focus:outline-none">
+                    </div>
+
+                    <!-- 録音・フィードバックパネル -->
+                    <div class="border-t border-slate-100 pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <button id="btnRecord" class="px-5 py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl shadow-md shadow-rose-100 transition flex items-center justify-center gap-2 min-w-[140px]">
+                                <span id="recIcon">●</span> <span id="recText">録音スタート</span>
+                            </button>
+                            <button id="btnPlayRec" disabled class="px-4 py-3 bg-slate-100 text-slate-400 font-medium rounded-xl transition flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed">
+                                [声再生] 自分の声を聴く
+                            </button>
+                        </div>
+                        <div id="recStatus" class="text-xs font-semibold text-slate-400 flex items-center gap-1.5 px-3 py-2 bg-slate-50 rounded-lg border border-slate-200/30">
+                            <span class="w-2 h-2 rounded-full bg-slate-300 block" id="statusDot"></span>
+                            <span id="statusText">マイク待機中</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 英文・日本文本体エリア -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
+                    <div class="p-4 bg-slate-50/80 border-b border-slate-100 flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-400 tracking-wider uppercase">Training Workspace</span>
+                        <span class="text-xs text-slate-500">文をクリックすると、その文だけをお手本再生できます</span>
+                    </div>
+                    
+                    <div id="scriptContainer" class="divide-y divide-slate-100">
+                        <!-- JavaScriptで動的生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右エリア：学習サポートサイドバー -->
+            <div class="space-y-6">
+                <!-- 背景知識とマナー -->
+                <div class="bg-gradient-to-br from-amber-50 to-orange-50/50 rounded-2xl p-5 border border-amber-200/60 shadow-sm">
+                    <h3 class="font-bold text-amber-900 flex items-center gap-1.5 text-base">
+                        ■ 今回の背景知識とマナー
+                    </h3>
+                    <ul class="mt-3 space-y-2.5 text-xs text-amber-900/80 leading-relaxed list-disc list-inside">
+                        <li><strong>wear and tear (摩耗や傷み)</strong>: 日常的に使用した結果生じる経年劣化を指します。中古品取引や賃貸契約で必ず使われる頻出表現です。</li>
+                        <li><strong>discrepancy (相違・不一致)</strong>: クレームを伝える際、「嘘だ！」と感情的に言わず「広告と実物に相違（discrepancy）がある」と表現することで、冷静かつ論理的なトーンを保ちます。</li>
+                        <li><strong>agreeable to you (ご納得いただける形で)</strong>: お客様に同意・納得してもらうためのクッション言葉。トラブル解決の第一報で相手を安心させるために役立ちます。</li>
+                    </ul>
+                </div>
+
+                <!-- 重要ビジネス表現カード -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4">
+                    <h3 class="font-bold text-slate-900 flex items-center gap-1.5 text-base border-b border-slate-100 pb-2">
+                        ■ 重要ビジネス・広告表現
+                    </h3>
+                    
+                    <div class="space-y-3.5">
+                        <div class="group">
+                            <div class="text-xs font-mono text-indigo-600 font-bold">oversight</div>
+                            <div class="text-sm font-bold text-slate-800 mt-0.5">見落とし、手落ち、過失</div>
+                            <p class="text-xs text-slate-500 mt-1 leading-relaxed">「We apologize for the oversight.（こちらの見落としで申し訳ありません）」と、自分のミスを認めて謝罪する際の定番名詞です。</p>
+                        </div>
+                        
+                        <div class="group">
+                            <div class="text-xs font-mono text-indigo-600 font-bold">fair resolution</div>
+                            <div class="text-sm font-bold text-slate-800 mt-0.5">公正な解決策</div>
+                            <p class="text-xs text-slate-500 mt-1 leading-relaxed">クレームを申し立てる側が「一方的に怒っているわけではなく、話し合って落とし所を見つけたい」と提案する際に使う建設的な表現です。</p>
+                        </div>
+
+                        <div class="group">
+                            <div class="text-xs font-mono text-indigo-600 font-bold">in accordance with ~</div>
+                            <div class="text-sm font-bold text-slate-800 mt-0.5">～に従って、～に基づいて</div>
+                            <p class="text-xs text-slate-500 mt-1 leading-relaxed">「store policy（店舗の規約）」や「law（法律）」などのルールに沿って対応する旨を示す際によく使われるフォーマルな表現です。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- マイコメント / 学習メモカード -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                        <h3 class="font-bold text-slate-900 text-base">
+                            ■ マイコメント / 学習メモ
+                        </h3>
+                        <span id="saveStatus" class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded transition-all duration-300 opacity-0">保存完了</span>
+                    </div>
+                    <div class="space-y-3">
+                        <p class="text-xs text-slate-500 leading-relaxed">
+                            今日の学習の気づきや、発音の注意点、新しく覚えたフレーズなどをここに書き留めておくことができます。
+                        </p>
+                        <textarea id="myNotes" rows="6" class="w-full p-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-slate-400" placeholder="例：
+・oversight は「オーバーサイト」で発音
+・fair resolution は交渉の際に使えそう
+・discrepancy のアクセントに注意する"></textarea>
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="btnSaveNotes" class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-[0.98]">
+                                メモを保存する
+                            </button>
+                            <button id="btnCopyNotes" class="py-2.5 px-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs font-bold rounded-xl transition-all">
+                                メモをコピー
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1">
+                            <button id="btnClearNotes" class="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-500 text-xs font-semibold rounded-xl transition-all">
+                                クリア
+                            </button>
+                        </div>
+                        <div id="copyAlert" class="text-[11px] text-emerald-600 font-semibold text-center hidden">
+                            コピーしました！クリップボードに保存されています。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK / アプリケーション主要ロジック -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- 英文・日本語データ定義 ---
+        const speechData = [
+            // === 広告文 ===
+            {
+                en: "FOR SALE: Used Trekkle Road Bike in Excellent Condition.",
+                ja: "販売中：状態が非常に良い中古のトレックル製ロードバイク"
+            },
+            {
+                en: "We are offering a meticulously maintained, high-performance road bike made by Trekkle.",
+                ja: "私たちは、入念にメンテナンスされた、トレックル製の高性能ロードバイクを提供しています。"
+            },
+            {
+                en: "It is green with thin white stripes.",
+                ja: "色は緑で、細い白のストライプが入っています。"
+            },
+            {
+                en: "Key features include a lightweight carbon fiber frame, 24 gears, and reliable Formollo Tech brakes.",
+                ja: "主な特徴として、軽量のカーボンファイバー製フレーム、24段変速ギア、そして信頼性の高いフォルモロテック製ブレーキが挙げられます。"
+            },
+            {
+                en: "The bike has recently been serviced and is in excellent condition.",
+                ja: "この自転車は最近点検を受けたばかりで、非常に良い状態にあります。"
+            },
+            {
+                en: "It comes with a cable lock, a powerful dual-beam headlamp and single-beam taillight, and a brand-new saddle.",
+                ja: "ケーブルロック、強力なデュアルビーム（2灯式）ヘッドライトとシングルビーム（1灯式）テールライト、そして新品のサドルが付属しています。"
+            },
+            {
+                en: "We are asking only $350, but the price is negotiable.",
+                ja: "価格はわずか350ドルですが、交渉も可能です。"
+            },
+            {
+                en: "Don't miss this chance to own a beautiful Trekkle.",
+                ja: "美しいトレックルを手に入れるこの機会をお見逃しなく。"
+            },
+            {
+                en: "Contact the Cyclers Shop at 555-0184 or support@cyclersshop.com today!",
+                ja: "今すぐ「サイクラーズ・ショップ」（電話：555-0184 または support@cyclersshop.com）までご連絡ください！"
+            },
+            {
+                en: "We'll deliver it right to your door.",
+                ja: "お客様の玄関先まで直接お届けいたします。"
+            },
+            {
+                en: "Please note that all sales are final, but we exchange products that do not measure up to expectations or are damaged during delivery.",
+                ja: "原則として返品はお受けできません（全品買い取り）が、ご期待に沿わない商品や配達中に破損した商品については交換いたしますので、ご了承ください。"
+            },
+            
+            // === メール1 (顧客からのクレーム) ===
+            {
+                en: "E-mail. To: support@cyclersshop.com. From: larrygreer@soarmail.com. Date: May 25. Subject: Used Trekkle.",
+                ja: "電子メール。宛先：support@cyclersshop.com。差出人：larrygreer@soarmail.com。日付：5月25日。件名：中古のトレックル。"
+            },
+            {
+                en: "Dear Cyclers Shop,",
+                ja: "サイクラーズ・ショップ様、"
+            },
+            {
+                en: "I purchased the green Trekkle that you advertised as being in excellent condition, and I paid the full asking price because I really wanted this particular model.",
+                ja: "私は、そちらが「非常に良い状態」として宣伝していた緑色のトレックルを購入し、この特定のモデルがどうしても欲しかったため、提示価格を全額支払いました。"
+            },
+            {
+                en: "The bike was delivered today, and I must say that I'm disappointed, as it doesn't match the description in the ad nor the photo that accompanied it.",
+                ja: "本日自転車が配達されましたが、広告の説明や添えられていた写真と一致していないため、がっかりしたと言わざるを得ません。"
+            },
+            {
+                en: "First, you stated that the overall condition was excellent, but this is not actually the case.",
+                ja: "第一に、全体的な状態は非常に良いと記載されていましたが、実際はそうではありません。"
+            },
+            {
+                en: "There are noticeable scratches and scuffs on the frame, and the saddle, though mentioned as brand-new, appears worn.",
+                ja: "フレームには目立つ引っかき傷や擦り傷があり、新品と記載されていたサドルは使い古されているように見えます。"
+            },
+            {
+                en: "Second, I did not receive the single-beam light mentioned in the listing.",
+                ja: "第二に、出品情報に記載されていたシングルビームのライトを受け取っていません。"
+            },
+            {
+                en: "While I understand that used items generally have some wear and tear, the discrepancies between the advertisement and the product are significant.",
+                ja: "中古品には一般的に多少の摩耗や傷みがあることは理解していますが、広告と商品の間の相違は重大です。"
+            },
+            {
+                en: "So, I request that you review the situation and contact me to discuss a fair resolution.",
+                ja: "そのため、この状況を確認し、公正な解決策を話し合うために私にご連絡いただくよう要請します。"
+            },
+            {
+                en: "I can be reached at 555-0168 or via this e-mail address.",
+                ja: "連絡先は555-0168、またはこのメールアドレスです。"
+            },
+            {
+                en: "Sincerely, Larry Greer.",
+                ja: "敬具、ラリー・グリア。"
+            },
+            
+            // === メール2 (店舗からの対応) ===
+            {
+                en: "E-mail. To: larrygreer@soarmail.com. From: support@cyclersshop.com. Date: May 26. Subject: RE: Used Trekkle.",
+                ja: "電子メール。宛先：larrygreer@soarmail.com。差出人：support@cyclersshop.com。日付：5月26日。件名：返信：中古のトレックル。"
+            },
+            {
+                en: "Dear Mr. Greer,",
+                ja: "グリア様、"
+            },
+            {
+                en: "We apologize for any discrepancies regarding the bicycle's condition, including the oversights with the missing light and worn saddle.",
+                ja: "ライトの欠品や使い古されたサドルといった見落としを含め、自転車の状態に関する相違についてお詫び申し上げます。"
+            },
+            {
+                en: "Ensuring the accurate representation of our products is a high priority at Cyclers Shop, and we want to address this matter in a way that is agreeable to you.",
+                ja: "商品の正確な説明を保証することはサイクラーズ・ショップにおいて最優先事項であり、お客様にご納得いただける形でこの問題に対処したいと考えております。"
+            },
+            {
+                en: "As for the saddle condition and scratches on the bike itself, we can resolve this in accordance with our store policy.",
+                ja: "サドルの状態や自転車本体の傷につきましては、当店のポリシーに従って解決することが可能です。"
+            },
+            {
+                en: "Alternatively, if you would like to keep the bike, we can send the missing light.",
+                ja: "あるいは、もしこのまま自転車をお持ちになりたい場合は、不足しているライトをお送りすることもできます。"
+            },
+            {
+                en: "Please give us a call at 555-0184 or reply to this e-mail with your preference and any further details you would like to share.",
+                ja: "555-0184までお電話いただくか、このメールにご返信いただき、ご希望の対応や共有しておきたい詳細をお知らせください。"
+            },
+            {
+                en: "Best regards, Kathy Weaver, Cyclers Shop Manager.",
+                ja: "よろしくお願いいたします。キャシー・ウィーバー、サイクラーズ・ショップ マネージャー。"
+            }
+        ];
+
+        // --- 状態管理変数 ---
+        const synth = window.speechSynthesis;
+        let currentUtterance = null;
+        let activeIndex = null;
+        let isLoopingAll = false;
+        let speechVoices = [];
+        
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let audioUrl = null;
+        let isRecording = false;
+
+        // --- Firebase/Firestore関連変数 ---
+        let db = null;
+        let auth = null;
+        let user = null;
+        let appId = 'default-app-id';
+
+        // --- DOM要素取得 ---
+        const scriptContainer = document.getElementById('scriptContainer');
+        const btnPlayAll = document.getElementById('btnPlayAll');
+        const btnStop = document.getElementById('btnStop');
+        const voiceSelect = document.getElementById('voiceSelect');
+        const speedRange = document.getElementById('speedRange');
+        const speedValue = document.getElementById('speedValue');
+        const modeToggle = document.getElementById('modeToggle');
+        
+        const btnRecord = document.getElementById('btnRecord');
+        const btnPlayRec = document.getElementById('btnPlayRec');
+        const recIcon = document.getElementById('recIcon');
+        const recText = document.getElementById('recText');
+        const recStatus = document.getElementById('recStatus');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+
+        // --- メモ機能用DOM要素取得 ---
+        const myNotes = document.getElementById('myNotes');
+        const btnSaveNotes = document.getElementById('btnSaveNotes');
+        const btnCopyNotes = document.getElementById('btnCopyNotes');
+        const btnClearNotes = document.getElementById('btnClearNotes');
+        const copyAlert = document.getElementById('copyAlert');
+        const saveStatus = document.getElementById('saveStatus');
+
+        // --- 音声リスト（男声・女声など）の取得と生成 ---
+        function loadVoices() {
+            if (!synth) return;
+            
+            const allVoices = synth.getVoices();
+            speechVoices = allVoices.filter(voice => voice.lang.startsWith('en'));
+            
+            if (speechVoices.length === 0) {
+                speechVoices = allVoices;
+            }
+
+            voiceSelect.innerHTML = '';
+            
+            if (speechVoices.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = "";
+                opt.textContent = "標準ブラウザ音声";
+                voiceSelect.appendChild(opt);
+                return;
+            }
+
+            speechVoices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                
+                let genderTag = "";
+                const nameLower = voice.name.toLowerCase();
+                if (nameLower.includes('david') || nameLower.includes('george') || nameLower.includes('male') || nameLower.includes('ravi') || nameLower.includes('mark') || nameLower.includes('daniel')) {
+                    genderTag = "[男声] ";
+                } else if (nameLower.includes('zira') || nameLower.includes('female') || nameLower.includes('hazel') || nameLower.includes('susan') || nameLower.includes('haruka') || nameLower.includes('lisa') || nameLower.includes('samantha')) {
+                    genderTag = "[女声] ";
+                } else {
+                    genderTag = "[音声] ";
+                }
+
+                const isDefault = voice.default ? " (推奨)" : "";
+                option.textContent = `${genderTag}${voice.name} (${voice.lang})${isDefault}`;
+                voiceSelect.appendChild(option);
+            });
+
+            const preferredIndex = speechVoices.findIndex(v => 
+                v.name.includes('Google US English') || 
+                v.name.includes('Zira') || 
+                v.name.includes('David') ||
+                v.name.includes('Samantha')
+            );
+            if (preferredIndex !== -1) {
+                voiceSelect.value = preferredIndex;
+            }
+        }
+
+        if (typeof synth !== 'undefined' && synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = loadVoices;
+        }
+
+        // --- 画面初期ビルド ---
+        function buildScriptUI() {
+            scriptContainer.innerHTML = '';
+            speechData.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.id = `row-${index}`;
+                row.className = "p-4 sm:p-5 transition-all duration-200 cursor-pointer hover:bg-slate-50/60 flex flex-col gap-1.5";
+                row.onclick = () => playSingleRow(index);
+
+                row.innerHTML = `
+                    <div class="text-xs font-bold text-slate-400 select-none">Sentence ${index + 1}</div>
+                    <div class="text-base sm:text-lg font-semibold text-slate-900 leading-relaxed tracking-wide" id="en-${index}">
+                        ${item.en}
+                    </div>
+                    <div class="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
+                        ${item.ja}
+                    </div>
+                `;
+                scriptContainer.appendChild(row);
+            });
+            loadVoices();
+        }
+
+        // --- 音声合成（TTS）処理 ---
+        function stopAudio() {
+            isLoopingAll = false;
+            synth.cancel();
+            if (currentUtterance) currentUtterance = null;
+            clearVisualHighlights();
+            btnPlayAll.innerHTML = "<span>[再生] 全文再生</span>";
+        }
+
+        function clearVisualHighlights() {
+            speechData.forEach((_, i) => {
+                const r = document.getElementById(`row-${i}`);
+                const e = document.getElementById(`en-${i}`);
+                if (r) r.classList.remove('playing-row');
+                if (e) e.classList.remove('highlight');
+            });
+            activeIndex = null;
+        }
+
+        function highlightRow(index) {
+            clearVisualHighlights();
+            activeIndex = index;
+            const row = document.getElementById(`row-${index}`);
+            const enText = document.getElementById(`en-${index}`);
+            if (row) row.classList.add('playing-row');
+            if (enText) enText.classList.add('highlight');
+            
+            row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function playSingleRow(index) {
+            stopAudio();
+            speakSequence(index, false);
+        }
+
+        function playAllFromStart() {
+            stopAudio();
+            isLoopingAll = true;
+            btnPlayAll.innerHTML = "<span>[一時停止中...]</span>";
+            speakSequence(0, true);
+        }
+
+        function speakSequence(index, continueNext = false) {
+            if (index >= speechData.length || !isLoopingAll && continueNext) {
+                stopAudio();
+                return;
+            }
+
+            highlightRow(index);
+            synth.cancel();
+
+            currentUtterance = new SpeechSynthesisUtterance(speechData[index].en);
+            
+            if (speechVoices.length > 0 && voiceSelect.value !== "") {
+                const selectedVoice = speechVoices[parseInt(voiceSelect.value)];
+                if (selectedVoice) {
+                    currentUtterance.voice = selectedVoice;
+                    currentUtterance.lang = selectedVoice.lang;
+                }
+            } else {
+                currentUtterance.lang = 'en-US';
+            }
+
+            currentUtterance.rate = parseFloat(speedRange.value);
+
+            currentUtterance.onend = () => {
+                if (continueNext && isLoopingAll) {
+                    const isStepMode = modeToggle.checked;
+                    if (isStepMode) {
+                        btnPlayAll.innerHTML = "<span>[再生] 全文再生</span>";
+                        isLoopingAll = false; 
+                    } else {
+                        speakSequence(index + 1, true);
+                    }
+                } else if (!continueNext) {
+                    clearVisualHighlights();
+                }
+            };
+
+            currentUtterance.onerror = () => {
+                clearVisualHighlights();
+            };
+
+            synth.speak(currentUtterance);
+        }
+
+        // --- マイク録音処理 ---
+        async function toggleRecording() {
+            if (!isRecording) {
+                audioChunks = [];
+                try {
+                    synth.cancel(); 
+                    
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    
+                    mediaRecorder.ondataavailable = (e) => {
+                        if (e.data.size > 0) audioChunks.push(e.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                        audioUrl = URL.createObjectURL(audioBlob);
+                        btnPlayRec.disabled = false;
+                        btnPlayRec.classList.remove('bg-slate-100', 'text-slate-400');
+                        btnPlayRec.classList.add('bg-indigo-100', 'text-indigo-700', 'hover:bg-indigo-200');
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    
+                    recIcon.textContent = "■";
+                    recText.textContent = "録音を停止";
+                    btnRecord.classList.replace('bg-rose-500', 'bg-slate-800');
+                    btnRecord.classList.replace('hover:bg-rose-600', 'hover:bg-slate-900');
+                    
+                    statusDot.classList.replace('bg-slate-300', 'bg-rose-500');
+                    statusDot.classList.add('animate-ping');
+                    statusText.textContent = "マイク録音中...";
+                    statusText.classList.add('text-rose-600');
+                } catch (err) {
+                    console.error("マイク接続エラー:", err);
+                    alert("マイクへのアクセスが拒否されたか、マイクが見つかりません。ブラウザの権限設定を確認してください。");
+                }
+            } else {
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                }
+                isRecording = false;
+                
+                recIcon.textContent = "●";
+                recText.textContent = "録音スタート";
+                btnRecord.classList.replace('bg-slate-800', 'bg-rose-500');
+                btnRecord.classList.replace('hover:bg-slate-900', 'hover:bg-rose-600');
+                
+                statusDot.classList.remove('animate-ping');
+                statusDot.classList.replace('bg-rose-500', 'bg-emerald-500');
+                statusText.textContent = "録音データ保存完了";
+                statusText.classList.replace('text-rose-600', 'text-emerald-600');
+            }
+        }
+
+        function playRecordedAudio() {
+            if (audioUrl) {
+                synth.cancel();
+                const audio = new Audio(audioUrl);
+                audio.play();
+            }
+        }
+
+        // --- ?? 新・クラウド＆ローカル保存処理 (100%確実セーブシステム) ---
+
+        function isLocalStorageAvailable() {
+            try {
+                const testKey = '__storage_test__';
+                localStorage.setItem(testKey, testKey);
+                localStorage.removeItem(testKey);
+                return true;
+            } catch (e) {
+                return false; 
+            }
+        }
+
+        const initFirebaseAndAuth = async () => {
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                try {
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    const app = initializeApp(firebaseConfig);
+                    auth = getAuth(app);
+                    db = getFirestore(app);
+                    appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+
+                    onAuthStateChanged(auth, async (u) => {
+                        user = u;
+                        await loadNotes(); 
+                    });
+                } catch (err) {
+                    console.error("クラウド接続エラー。ローカル保存へ移行します。:", err);
+                    await loadNotes();
+                }
+            } else {
+                await loadNotes();
+            }
+        };
+
+        async function loadNotes() {
+            let loadedText = "";
+
+            if (isLocalStorageAvailable()) {
+                try {
+                    const localData = localStorage.getItem('kindoku_notes_Ex007');
+                    if (localData !== null) {
+                        loadedText = localData;
+                        myNotes.value = localData;
+                    }
+                } catch (e) {
+                    console.error("ローカルデータ読み込み例外:", e);
+                }
+            }
+
+            if (db && user) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'notes', 'kindoku_Ex007');
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        const cloudData = docSnap.data().text || '';
+                        
+                        if (!loadedText || loadedText !== cloudData) {
+                            myNotes.value = cloudData;
+                            if (isLocalStorageAvailable()) {
+                                localStorage.setItem('kindoku_notes_Ex007', cloudData);
+                            }
+                        }
+                    }
+                } catch (err) {
+                    console.error("クラウドメモ読み込みエラー:", err);
+                }
+            }
+        }
+
+        async function saveNotesAction() {
+            const text = myNotes.value;
+            
+            saveStatus.textContent = "保存中...";
+            saveStatus.className = "text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded transition-all duration-200 opacity-100 animate-pulse";
+
+            let savedCloud = false;
+            let savedLocal = false;
+
+            if (db && user) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'notes', 'kindoku_Ex007');
+                    await setDoc(docRef, { text: text, updatedAt: new Date().toISOString() }, { merge: true });
+                    savedCloud = true;
+                } catch (err) {
+                    console.error("クラウド保存失敗:", err);
+                }
+            }
+
+            if (isLocalStorageAvailable()) {
+                try {
+                    localStorage.setItem('kindoku_notes_Ex007', text);
+                    savedLocal = true;
+                } catch (err) {
+                    console.error("ローカル保存失敗:", err);
+                }
+            }
+
+            if (savedCloud && savedLocal) {
+                showSaveStatus("保存完了(クラウド＆ローカル)");
+            } else if (savedCloud) {
+                showSaveStatus("保存完了(クラウド同期)");
+            } else if (savedLocal) {
+                showSaveStatus("保存完了(ブラウザ保存)");
+            } else {
+                showSaveStatus("保存不可");
+                alert("ブラウザのストレージ制限（シークレットモード等）により、データ保存ができませんでした。記述したテキストが消えてしまう前に、「コピー」ボタンを押してクリップボードへ退避してください。");
+            }
+        }
+
+        let saveTimeout = null;
+        function handleNoteInput() {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                const text = myNotes.value;
+                if (isLocalStorageAvailable()) {
+                    try {
+                        localStorage.setItem('kindoku_notes_Ex007', text);
+                    } catch (e) {
+                        console.error("自動一時セーブ失敗:", e);
+                    }
+                }
+            }, 1000); 
+        }
+
+        function showSaveStatus(text) {
+            saveStatus.textContent = text;
+            saveStatus.className = "text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded transition-all duration-300 opacity-100";
+            
+            setTimeout(() => {
+                saveStatus.classList.replace('opacity-100', 'opacity-0');
+            }, 2500);
+        }
+
+        btnCopyNotes.onclick = () => {
+            const textToCopy = myNotes.value;
+            if (!textToCopy.trim()) return;
+
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = textToCopy;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    copyAlert.classList.remove('hidden');
+                    setTimeout(() => {
+                        copyAlert.classList.add('hidden');
+                    }, 2000);
+                }
+            } catch (err) {
+                console.error('コピーに失敗しました:', err);
+            } finally {
+                document.body.removeChild(tempTextArea);
+            }
+        };
+
+        btnClearNotes.onclick = () => {
+            myNotes.value = '';
+            handleNoteInput(); 
+        };
+
+        // --- イベントリスナー登録 ---
+        btnPlayAll.onclick = () => {
+            if (isLoopingAll) stopAudio();
+            else playAllFromStart();
+        };
+        btnStop.onclick = stopAudio;
+        btnRecord.onclick = toggleRecording;
+        btnPlayRec.onclick = playRecordedAudio;
+        
+        btnSaveNotes.onclick = saveNotesAction; 
+        myNotes.oninput = handleNoteInput; 
+        
+        voiceSelect.onchange = () => {
+            if (activeIndex !== null && synth.speaking) {
+                const savedIndex = activeIndex;
+                const savedLoop = isLoopingAll;
+                stopAudio();
+                isLoopingAll = savedLoop;
+                if (savedLoop) btnPlayAll.innerHTML = "<span>[一時停止中...]</span>";
+                speakSequence(savedIndex, savedLoop);
+            }
+        };
+
+        speedRange.oninput = () => {
+            const currentSpeed = parseFloat(speedRange.value).toFixed(2);
+            speedValue.textContent = `${currentSpeed}x`;
+        };
+
+        speedRange.onchange = () => {
+            if (activeIndex !== null && synth.speaking) {
+                const savedIndex = activeIndex;
+                const savedLoop = isLoopingAll;
+                stopAudio();
+                isLoopingAll = savedLoop;
+                if (savedLoop) btnPlayAll.innerHTML = "<span>[一時停止中...]</span>";
+                speakSequence(savedIndex, savedLoop);
+            }
+        };
+
+        const init = async () => {
+            buildScriptUI();
+            await initFirebaseAndAuth();
+        };
+
+        window.onload = init;
+    </script>
+</body>
+</html>
