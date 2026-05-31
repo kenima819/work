@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ビジネス英語音読トレーナー - Ex009 (物件問い合わせとWebページ)</title>
+    <!-- Tailwind CSS for high quality layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .highlight { background-color: #fef08a; border-bottom: 2px solid #eab308; }
+        .playing-row { background-color: #f0fdf4; border-left: 4px solid #22c55e; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+    <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        <!-- ヘッダー -->
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-4 mb-6">
+            <div>
+                <span id="exerciseDisplay" class="text-xs font-bold tracking-widest text-indigo-600 uppercase bg-indigo-50 px-2.5 py-1 rounded-md">Exercise 009</span>
+                <h1 class="text-2xl font-bold text-slate-900 mt-1">物件問い合わせとWebページ（E-mail & Webpage）</h1>
+            </div>
+            <div class="mt-2 sm:mt-0 text-sm text-slate-500 font-medium">
+                対象ファイル名: <code id="filenameDisplay" class="bg-slate-100 px-1.5 py-0.5 rounded text-indigo-600 font-mono text-xs">kindoku_Ex009.html</code>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- 左・中央エリア：音読メインコントロール -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- コントロールパネル -->
+                <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/60 space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <!-- 再生・停止 -->
+                        <div class="flex items-center gap-2">
+                            <button id="btnPlayAll" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl shadow-sm transition flex items-center gap-2">
+                                <span>[再生] 全文再生</span>
+                            </button>
+                            <button id="btnStop" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium rounded-xl transition">
+                                [停止]
+                            </button>
+                        </div>
+
+                        <!-- 音声タイプ（男性・女性）選択 -->
+                        <div class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200/40 min-w-[180px]">
+                            <label for="voiceSelect" class="text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Voice:</label>
+                            <select id="voiceSelect" class="bg-transparent font-semibold text-slate-700 focus:outline-none text-xs cursor-pointer w-full max-w-[200px]">
+                                <option value="">(音声読み込み中...)</option>
+                            </select>
+                        </div>
+
+                        <!-- モード切替 -->
+                        <div class="flex items-center gap-2">
+                            <label class="relative inline-flex items-center cursor-pointer select-none">
+                                <input type="checkbox" id="modeToggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                                <span class="ml-2 text-sm font-medium text-slate-700">1文ごとに自動停止</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 自由スピード調整スライダー -->
+                    <div class="bg-slate-50/70 p-4 rounded-xl border border-slate-200/40 flex flex-col sm:flex-row items-center gap-4">
+                        <div class="w-full flex items-center justify-between sm:w-auto gap-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Speed:</span>
+                            <span id="speedValue" class="text-sm font-mono font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">1.00x</span>
+                        </div>
+                        <input type="range" id="speedRange" min="0.5" max="2.0" step="0.05" value="1.0" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 focus:outline-none">
+                    </div>
+
+                    <!-- 録音・フィードバックパネル -->
+                    <div class="border-t border-slate-100 pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <button id="btnRecord" class="px-5 py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl shadow-md shadow-rose-100 transition flex items-center justify-center gap-2 min-w-[140px]">
+                                <span id="recIcon">[REC]</span> <span id="recText">録音スタート</span>
+                            </button>
+                            <button id="btnPlayRec" disabled class="px-4 py-3 bg-slate-100 text-slate-400 font-medium rounded-xl transition flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed">
+                                [声再生] 自分の声を聴く
+                            </button>
+                        </div>
+                        <div id="recStatus" class="text-xs font-semibold text-slate-400 flex items-center gap-1.5 px-3 py-2 bg-slate-50 rounded-lg border border-slate-200/30">
+                            <span class="w-2 h-2 rounded-full bg-slate-300 block" id="statusDot"></span>
+                            <span id="statusText">マイク待機中</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 英文・日本文本体エリア -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
+                    <div class="p-4 bg-slate-50/80 border-b border-slate-100 flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-400 tracking-wider uppercase">Training Workspace</span>
+                        <span class="text-xs text-slate-500">ブロックをクリックすると、そのパートだけお手本再生できます</span>
+                    </div>
+                    
+                    <div id="scriptContainer" class="divide-y divide-slate-100">
+                        <!-- JavaScriptで動的生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右エリア：学習サポートサイドバー -->
+            <div class="space-y-6 max-h-[85vh] overflow-y-auto pr-1">
+                <!-- 語注エリア -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4">
+                    <h3 class="font-bold text-slate-900 text-base border-b border-slate-100 pb-2">
+                        [徹底解説・重要語注]
+                    </h3>
+                    
+                    <!-- 【メール＆ウェブページ】 語注 -->
+                    <div>
+                        <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-2">【メール＆ウェブの重要語彙】</h4>
+                        <div class="space-y-2 text-xs leading-relaxed text-slate-600 max-h-[300px] overflow-y-auto pr-1 border-b border-slate-100 pb-3">
+                            <p><strong>enquiry</strong> [名] 問い合わせ(= inquiry)</p>
+                            <p><strong>establish</strong> [動] 設立する</p>
+                            <p><strong>branch office</strong> 支店</p>
+                            <p><strong>insurance</strong> [名] 保険</p>
+                            <p><strong>temporary</strong> [形] 一時的な、臨時の</p>
+                            <p><strong>assignment</strong> [名] 仕事、任務</p>
+                            <p><strong>intend to do</strong> 〜するつもりだ</p>
+                            <p><strong>lease</strong> [動] 借りる [名] 賃貸借契約</p>
+                            <p><strong>settle in</strong> （新しい環境に）慣れて落ち着く</p>
+                            <p><strong>ideally</strong> [副] できれば</p>
+                            <p><strong>in close proximity to</strong> 〜に近い</p>
+                            <p><strong>district</strong> [名] 地区</p>
+                            <p><strong>meet</strong> [動] 満たす</p>
+                            <p><strong>requirement</strong> [名] 要件</p>
+                            <p><strong>fully furnished</strong> 家具完備の</p>
+                            <p><strong>well-equipped</strong> [形] 設備が整った</p>
+                            <p><strong>extend</strong> [動] 延長する</p>
+                            <p><strong>if necessary</strong> 必要なら</p>
+                            <p><strong>monthly</strong> [形] 毎月の</p>
+                            <p><strong>rent</strong> [名] 家賃</p>
+                            <p><strong>comfortable</strong> [形] 心地よい</p>
+                            <p><strong>reside</strong> [動] 住む</p>
+                            <p><strong>prefer</strong> [動] 〜の方を好む</p>
+                            <p><strong>suitable</strong> [形] 適した</p>
+                            <p><strong>available</strong> [動] 手に入る</p>
+                            <p><strong>additionally</strong> [副] 加えて、それと</p>
+                            <p><strong>upcoming</strong> [形] 今度の</p>
+                            <p><strong>viewing</strong> [名] 見学</p>
+                            <p><strong>so that S can V</strong> S が V できるように</p>
+                            <p><strong>accordingly</strong> [副] それに応じて</p>
+                            <p><strong>downtown</strong> [形] 中心地の</p>
+                            <p><strong>indulge in</strong> 〜に浸る</p>
+                            <p><strong>luxury</strong> [名] 豪華さ、ぜいたく</p>
+                            <p><strong>storey</strong> [名] （建物の）階</p>
+                            <p><strong>located</strong> [形] 〜にある</p>
+                            <p><strong>central</strong> [形] 中心の</p>
+                            <p><strong>breathtaking</strong> [形] 息をのむような</p>
+                            <p><strong>view</strong> [名] 眺め</p>
+                            <p><strong>bay</strong> [名] 湾</p>
+                            <p><strong>modern</strong> [形] 近代的な</p>
+                            <p><strong>amenity</strong> [名] 設備、装備品</p>
+                            <p><strong>per</strong> [前] 〜につき</p>
+                            <p><strong>spacious</strong> [形] 広々とした</p>
+                            <p><strong>come complete with</strong> 〜を完備している</p>
+                            <p><strong>contemporary</strong> [形] 現代的な</p>
+                            <p><strong>furnishings</strong> [名] 家具類</p>
+                            <p><strong>open-plan</strong> [形] 開放感のある</p>
+                            <p><strong>necessary</strong> [形] 必要な</p>
+                            <p><strong>appliance</strong> [名] 電化製品</p>
+                            <p><strong>delightful</strong> [形] 楽しい</p>
+                            <p><strong>partially</strong> [副] 部分的に</p>
+                            <p><strong>combine</strong> [動] 併せ持つ</p>
+                            <p><strong>comfort</strong> [名] 快適さ</p>
+                            <p><strong>convenience</strong> [名] 便利さ</p>
+                            <p><strong>public transportation</strong> 公共の交通機関</p>
+                            <p><strong>easily</strong> [副] 簡単に</p>
+                            <p><strong>accessible</strong> [形] アクセスできる、行ける</p>
+                            <p><strong>passenger</strong> [名] 乗客</p>
+                            <p><strong>notable</strong> [形] 注目すべき</p>
+                            <p><strong>feature</strong> [名] 特徴</p>
+                            <p><strong>laundry</strong> [名] 洗濯</p>
+                            <p><strong>lush</strong> [形] 緑豊かな</p>
+                            <p><strong>vicinity</strong> [名] 近所</p>
+                            <p><strong>note</strong> [名] 注、注記</p>
+                            <p><strong>as needed</strong> 必要に応じて</p>
+                            <p><strong>contact</strong> [動] 連絡する</p>
+                            <p><strong>experienced</strong> [形] 経験豊富な</p>
+                            <p><strong>agent</strong> [名] 代理人</p>
+                            <p><strong>above</strong> [形] 上記の、上の</p>
+                        </div>
+                    </div>
+
+                    <!-- [設問・選択肢の表現] 語注 -->
+                    <div class="border-t border-slate-100 pt-3">
+                        <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-2">【設問・選択肢の重要語彙】</h4>
+                        <div class="space-y-2 text-xs leading-relaxed text-slate-600">
+                            <p><strong>relocate</strong> [動] 引っ越す、移転する</p>
+                            <p><strong>own</strong> [形] 自身の</p>
+                            <p><strong>conduct</strong> [動] 行う</p>
+                            <p><strong>research</strong> [名] 調査、研究</p>
+                            <p><strong>recently</strong> [副] 最近</p>
+                            <p><strong>purchase</strong> [動] 購入する</p>
+                            <p><strong>used to do</strong> 以前〜していた</p>
+                            <p><strong>real estate agent</strong> 不動産代理人</p>
+                            <p><strong>usually</strong> [副] 通常、普段</p>
+                            <p><strong>commute</strong> [動] 通勤する</p>
+                            <p><strong>facility</strong> [名] 施設</p>
+                            <p><strong>scenic</strong> [形] 景色が良い</p>
+                            <p><strong>property</strong> [名] 物件、不動産</p>
+                            <p><strong>rental</strong> [名] 賃貸物件</p>
+                            <p><strong>negotiate</strong> [動] 交渉する</p>
+                            <p><strong>deal</strong> [名] 取引条件</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- マイコメント / 学習メモカード -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                        <h3 class="font-bold text-slate-900 text-base">
+                            [マイコメント / 学習メモ]
+                        </h3>
+                        <span id="saveStatus" class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded transition-all duration-300 opacity-0">保存完了</span>
+                    </div>
+                    
+                    <!-- コード直接記述メモ -->
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider">[固定の学習メモ(コード同期)]</h4>
+                        <ul id="staticNotesList" class="list-disc list-outside pl-4 text-xs text-slate-700 space-y-1.5 leading-relaxed">
+                            <!-- JS側で定義された配列から動的出力 -->
+                        </ul>
+                    </div>
+
+                    <!-- その場の一時メモ記入エリア -->
+                    <div class="space-y-3 pt-3 border-t border-slate-100">
+                        <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider">[その場の一時メモ]</h4>
+                        <p class="text-[11px] text-slate-400 leading-relaxed">
+                            ※この記入欄は、お使いのブラウザに一時的に保存されます。
+                        </p>
+                        <textarea id="myNotes" rows="5" class="w-full p-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-slate-400" placeholder="その場で気付いたことの一時的なメモに使えます。"></textarea>
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="btnSaveNotes" class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-[0.98]">
+                                メモを保存する
+                            </button>
+                            <button id="btnCopyNotes" class="py-2.5 px-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs font-bold rounded-xl transition-all">
+                                メモをコピー
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1">
+                            <button id="btnClearNotes" class="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-500 text-xs font-semibold rounded-xl transition-all">
+                                クリア
+                            </button>
+                        </div>
+                        <div id="copyAlert" class="text-[11px] text-emerald-600 font-semibold text-center hidden">
+                            コピーしました！クリップボードに保存されています。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK / 主要ロジック -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // =========================================================================
+        // 【固定メモ（コード同期）の編集エリア】
+        // =========================================================================
+        const staticNotes = [
+            "establish a branch office (支店を設立する)",
+            "temporary assignment (一時的な任務・赴任)",
+            "lease a one-bedroom apartment (1ベッドルームアパートを借りる)",
+            "in close proximity to the business district (ビジネス街に非常に近い)",
+            "meet the following requirements (以下の要件を満たす)",
+            "fully furnished with a well-equipped kitchen (設備の整ったキッチン付きの家具完備物件)",
+            "not comfortable with residing high up (高層階に住むことには抵抗がある)",
+            "low floor / top floor (低層階 / 最上階)",
+            "upcoming viewings (近々の内覧会・見学)"
+        ];
+
+        // --- 英文・日本語データ定義 ---
+        const speechData = [
+            {
+                role: "email-header",
+                meta: "4 December",
+                speakerName: "E-mail: Enquiry",
+                en: "To: info@ledermanestates.com\nFrom: maureenholmes@avancore.com\nSubject: Enquiry",
+                ja: "宛先：info@ledermanestates.com、送信者：maureenholmes@avancore.com、件名：問い合わせ"
+            },
+            {
+                role: "email-body",
+                meta: "Intro",
+                speakerName: "Maureen Holmes",
+                en: "I will be moving from Sydney to Darwin in a few weeks to establish a branch office for Avancore Insurance.",
+                ja: "アバンコア保険の支店設立のため、数週間後にシドニーからダーウィンに引っ越す予定です。"
+            },
+            {
+                role: "email-body",
+                meta: "Plan",
+                speakerName: "Maureen Holmes",
+                en: "During this temporary assignment, I intend to lease a one-bedroom apartment for about a year. I hope to start settling in at the end of next month.",
+                ja: "この一時的な仕事の間、1 ベッドルームのアパートを 1 年ほど借りるつもりです。来月末には住み始めたいと思っています。"
+            },
+            {
+                role: "email-body",
+                meta: "Condition",
+                speakerName: "Maureen Holmes",
+                en: "Ideally, it will be in close proximity to the business district and meet the following requirements: Fully furnished with a well-equipped kitchen, One-year lease with the option to extend if necessary, Monthly rent of between $1,200 and $1,500.",
+                ja: "ビジネス街に近く、以下の条件を満たすことが理想です。：家具完備でキッチンの設備が整っている、1年契約で必要なら延長も可能、月額家賃1,200ドル〜1,500ドルの間。"
+            },
+            {
+                role: "email-body",
+                meta: "Floor Preference",
+                speakerName: "Maureen Holmes",
+                en: "I am not comfortable with the idea of residing high up in a building, so I’d prefer a place on a low floor.",
+                ja: "高層階に住むのは抵抗があるので、低層階を希望します。"
+            },
+            {
+                role: "email-body",
+                meta: "Request",
+                speakerName: "Maureen Holmes",
+                en: "If you have any suitable options available, I want to hear about them. Additionally, if there are upcoming viewings, please let me know so that I can plan accordingly.",
+                ja: "適切な選択肢があれば話を聞きたいです。また、近々内覧会があるようでしたら、それに合わせて計画を立てたいので、教えてください。"
+            },
+            {
+                role: "web-title",
+                meta: "Listings",
+                speakerName: "Lederman Estates",
+                en: "Available Apartments in Downtown Darwin",
+                ja: "ダーウィンの中心街で入居可能なアパート一覧"
+            },
+            {
+                role: "property-1",
+                meta: "$1,400/mo",
+                speakerName: "Pinnacle Tower",
+                en: "Pinnacle Tower: Indulge in luxury living at Pinnacle Tower, a 32-storey building located in central Darwin. This fully furnished one-bedroom apartment on the top floor offers breathtaking views of Fannie Bay. Enjoy modern amenities and close proximity to the business district and ferry terminals.",
+                ja: "ピナクルタワー：32階建ての最上階、家具完備アパート。ファニー湾の絶景、ビジネス街やフェリーターミナル至近。月1,400ドル。"
+            },
+            {
+                role: "property-2",
+                meta: "$1,400/mo",
+                speakerName: "Platinum Building",
+                en: "Platinum Building: This spacious one-bedroom apartment comes complete with contemporary furnishings and an open-plan living-kitchen area with all the necessary appliances. Its second-floor balcony offers delightful views of Civic Park.",
+                ja: "プラチナムビル：広々とした1ベッドルーム、現代的家具と必要家電を完備。2階のバルコニーからシビックパークの素晴らしい景色。月1,400ドル。"
+            },
+            {
+                role: "property-3",
+                meta: "$1,600/mo",
+                speakerName: "Meriton Apartments",
+                en: "Meriton Apartments: This partially furnished one-bedroom apartment with a large kitchen and dining room combines comfort and convenience. It is in a four-storey building near public transportation options and is easily accessible by passenger ferry. Another notable feature is its laundry room.",
+                ja: "メリトンアパート：一部家具付き、広いキッチンとダイニング。4階建てで公共交通機関や旅客フェリーへのアクセス良好。ランドリールームあり。月1,600ドル。"
+            },
+            {
+                role: "property-4",
+                meta: "$1,500/mo",
+                speakerName: "Capita Residences",
+                en: "Capita Residences: This modern, fully furnished apartment has a large open-plan kitchen area and living room, both with a view of a lush garden. There are lots of places for shopping, dining, and entertainment in the vicinity. With three bedrooms, this apartment is perfect for a small family.",
+                ja: "キャピタレジデンス：家具完備、広いオープンキッチンとリビングから緑豊かな庭が見える。周辺施設充実。3ベッドルームで少人数家族向け。月1,500ドル。"
+            },
+            {
+                role: "web-footer",
+                meta: "Note & Contact",
+                speakerName: "Lederman Estates",
+                en: "Note: All apartments are available with a one-year lease and the option to extend as needed. Contact our experienced agents at Lederman Estates to schedule a time to visit. Phone: +61-8-5550-3090, E-mail: info@ledermanestates.com",
+                ja: "注：すべて1年契約（延長可）。内覧のご予約は経験豊富なエージェントまで。電話：+61-8-5550-3090"
+            }
+        ];
+
+        // --- 状態管理変数 ---
+        const synth = window.speechSynthesis;
+        let currentUtterance = null;
+        let activeIndex = null;
+        let isLoopingAll = false;
+        let speechVoices = [];
+        
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let audioUrl = null;
+        let isRecording = false;
+
+        // --- Firebase関連変数 ---
+        let db = null;
+        let auth = null;
+        let user = null;
+        let appId = 'default-app-id';
+
+        let currentFilename = "kindoku_Ex009.html";
+        let storageKey = "kindoku_notes_Ex009";
+        let cloudDocId = "kindoku_Ex009";
+
+        // --- DOM要素取得 ---
+        const scriptContainer = document.getElementById('scriptContainer');
+        const btnPlayAll = document.getElementById('btnPlayAll');
+        const btnStop = document.getElementById('btnStop');
+        const voiceSelect = document.getElementById('voiceSelect');
+        const speedRange = document.getElementById('speedRange');
+        const speedValue = document.getElementById('speedValue');
+        const modeToggle = document.getElementById('modeToggle');
+        
+        const btnRecord = document.getElementById('btnRecord');
+        const btnPlayRec = document.getElementById('btnPlayRec');
+        const recIcon = document.getElementById('recIcon');
+        const recText = document.getElementById('recText');
+        const recStatus = document.getElementById('recStatus');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+
+        const myNotes = document.getElementById('myNotes');
+        const btnSaveNotes = document.getElementById('btnSaveNotes');
+        const btnCopyNotes = document.getElementById('btnCopyNotes');
+        const btnClearNotes = document.getElementById('btnClearNotes');
+        const copyAlert = document.getElementById('copyAlert');
+        const saveStatus = document.getElementById('saveStatus');
+        const staticNotesList = document.getElementById('staticNotesList');
+
+        function setupFilenameAndKeys() {
+            try {
+                const path = window.location.pathname;
+                const filename = path.substring(path.lastIndexOf('/') + 1);
+                if (filename && filename.includes('.html')) {
+                    currentFilename = filename;
+                    document.getElementById('filenameDisplay').textContent = filename;
+                    const nameWithoutExt = filename.replace('.html', '');
+                    storageKey = `kindoku_notes_${nameWithoutExt}`;
+                    cloudDocId = nameWithoutExt;
+                }
+            } catch (e) {
+                console.error("ファイル名同期エラー:", e);
+            }
+        }
+
+        function buildStaticNotesUI() {
+            staticNotesList.innerHTML = '';
+            staticNotes.forEach(note => {
+                const li = document.createElement('li');
+                li.textContent = note;
+                staticNotesList.appendChild(li);
+            });
+        }
+
+        function loadVoices() {
+            if (!synth) return;
+            const allVoices = synth.getVoices();
+            speechVoices = allVoices.filter(voice => voice.lang.startsWith('en'));
+            if (speechVoices.length === 0) speechVoices = allVoices;
+
+            voiceSelect.innerHTML = '';
+            speechVoices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                let genderTag = "[音声] ";
+                const nameLower = voice.name.toLowerCase();
+                if (nameLower.includes('david') || nameLower.includes('george') || nameLower.includes('male') || nameLower.includes('mark')) {
+                    genderTag = "[男声] ";
+                } else if (nameLower.includes('zira') || nameLower.includes('female') || nameLower.includes('hazel') || nameLower.includes('samantha')) {
+                    genderTag = "[女声] ";
+                }
+                option.textContent = `${genderTag}${voice.name} (${voice.lang})`;
+                voiceSelect.appendChild(option);
+            });
+
+            const preferredIndex = speechVoices.findIndex(v => v.name.includes('Google US English') || v.name.includes('Zira') || v.name.includes('Samantha'));
+            if (preferredIndex !== -1) voiceSelect.value = preferredIndex;
+        }
+
+        if (typeof synth !== 'undefined' && synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = loadVoices;
+        }
+
+        function buildScriptUI() {
+            scriptContainer.innerHTML = '';
+            speechData.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.id = `row-${index}`;
+                row.className = "p-4 sm:p-5 transition-all duration-200 cursor-pointer hover:bg-slate-50/60 flex flex-col gap-1.5";
+                row.onclick = () => playSingleRow(index);
+
+                let badgeClass = "bg-slate-100 text-slate-700";
+                if (item.role.includes('email')) badgeClass = "bg-pink-50 text-pink-700";
+                else if (item.role === 'property-1') badgeClass = "bg-blue-50 text-blue-700";
+                else if (item.role === 'property-2') badgeClass = "bg-emerald-50 text-emerald-700";
+                else if (item.role === 'property-3') badgeClass = "bg-purple-50 text-purple-700";
+                else if (item.role === 'property-4') badgeClass = "bg-amber-50 text-amber-700";
+
+                row.innerHTML = `
+                    <div class="flex items-center gap-2 select-none">
+                        <span class="text-xs font-bold text-slate-400">Section ${index + 1}</span>
+                        <span class="${badgeClass} text-[10px] font-bold px-1.5 py-0.5 rounded">${item.speakerName}</span>
+                        <span class="text-[10px] text-slate-400 font-mono">${item.meta}</span>
+                    </div>
+                    <div class="text-base sm:text-lg font-semibold text-slate-900 leading-relaxed tracking-wide mt-1 whitespace-pre-line" id="en-${index}">
+                        ${item.en}
+                    </div>
+                    <div class="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
+                        ${item.ja}
+                    </div>
+                `;
+                scriptContainer.appendChild(row);
+            });
+            loadVoices();
+        }
+
+        function stopAudio() {
+            isLoopingAll = false;
+            synth.cancel();
+            clearVisualHighlights();
+            btnPlayAll.innerHTML = "<span>[再生] 全文再生</span>";
+        }
+
+        function clearVisualHighlights() {
+            speechData.forEach((_, i) => {
+                const r = document.getElementById(`row-${i}`);
+                const e = document.getElementById(`en-${i}`);
+                if (r) r.classList.remove('playing-row');
+                if (e) e.classList.remove('highlight');
+            });
+            activeIndex = null;
+        }
+
+        function highlightRow(index) {
+            clearVisualHighlights();
+            activeIndex = index;
+            const row = document.getElementById(`row-${index}`);
+            const enText = document.getElementById(`en-${index}`);
+            if (row) row.classList.add('playing-row');
+            if (enText) enText.classList.add('highlight');
+            row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function playSingleRow(index) {
+            stopAudio();
+            speakSequence(index, false);
+        }
+
+        function playAllFromStart() {
+            stopAudio();
+            isLoopingAll = true;
+            btnPlayAll.innerHTML = "<span>[一時停止中...]</span>";
+            speakSequence(0, true);
+        }
+
+        function speakSequence(index, continueNext = false) {
+            if (index >= speechData.length || (!isLoopingAll && continueNext)) {
+                stopAudio();
+                return;
+            }
+
+            highlightRow(index);
+            synth.cancel();
+
+            let speakEn = speechData[index].en;
+            currentUtterance = new SpeechSynthesisUtterance(speakEn);
+            
+            if (speechVoices.length > 0 && voiceSelect.value !== "") {
+                const selectedVoice = speechVoices[parseInt(voiceSelect.value)];
+                if (selectedVoice) {
+                    currentUtterance.voice = selectedVoice;
+                    currentUtterance.lang = selectedVoice.lang;
+                }
+            } else {
+                currentUtterance.lang = 'en-US';
+            }
+
+            currentUtterance.rate = parseFloat(speedRange.value);
+
+            currentUtterance.onend = () => {
+                if (continueNext && isLoopingAll) {
+                    if (modeToggle.checked) {
+                        btnPlayAll.innerHTML = "<span>[再生] 全文再生</span>";
+                        isLoopingAll = false; 
+                    } else {
+                        speakSequence(index + 1, true);
+                    }
+                } else if (!continueNext) {
+                    clearVisualHighlights();
+                }
+            };
+
+            currentUtterance.onerror = () => {
+                clearVisualHighlights();
+            };
+
+            synth.speak(currentUtterance);
+        }
+
+        async function toggleRecording() {
+            if (!isRecording) {
+                audioChunks = [];
+                try {
+                    synth.cancel(); 
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                        audioUrl = URL.createObjectURL(audioBlob);
+                        btnPlayRec.disabled = false;
+                        btnPlayRec.className = "px-4 py-3 bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-medium rounded-xl transition flex items-center justify-center gap-1";
+                    };
+                    mediaRecorder.start();
+                    isRecording = true;
+                    recIcon.textContent = "[STOP]";
+                    recText.textContent = "録音を停止";
+                    btnRecord.classList.replace('bg-rose-500', 'bg-slate-800');
+                    statusDot.classList.replace('bg-slate-300', 'bg-rose-500');
+                    statusDot.classList.add('animate-ping');
+                    statusText.textContent = "マイク録音中...";
+                } catch (err) {
+                    alert("マイクが見つからないかアクセスが拒否されました。");
+                }
+            } else {
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                }
+                isRecording = false;
+                recIcon.textContent = "[REC]";
+                recText.textContent = "録音スタート";
+                btnRecord.classList.replace('bg-slate-800', 'bg-rose-500');
+                statusDot.classList.remove('animate-ping');
+                statusDot.classList.replace('bg-rose-500', 'bg-emerald-500');
+                statusText.textContent = "録音保存完了";
+            }
+        }
+
+        function playRecordedAudio() {
+            if (audioUrl) {
+                synth.cancel();
+                new Audio(audioUrl).play();
+            }
+        }
+
+        function isLocalStorageAvailable() {
+            try { const k = '__t__'; localStorage.setItem(k, k); localStorage.removeItem(k); return true; }
+            catch (e) { return false; }
+        }
+
+        async function loadNotes() {
+            if (isLocalStorageAvailable()) {
+                const localData = localStorage.getItem(storageKey);
+                if (localData !== null) myNotes.value = localData;
+            }
+        }
+
+        async function saveNotesAction() {
+            const text = myNotes.value;
+            if (isLocalStorageAvailable()) {
+                localStorage.setItem(storageKey, text);
+                showSaveStatus("保存完了(ブラウザ保存)");
+            }
+        }
+
+        function handleNoteInput() {
+            const text = myNotes.value;
+            if (isLocalStorageAvailable()) localStorage.setItem(storageKey, text);
+        }
+
+        function showSaveStatus(text) {
+            saveStatus.textContent = text;
+            saveStatus.className = "text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded transition-all duration-300 opacity-100";
+            setTimeout(() => { saveStatus.className = "text-[10px] font-bold opacity-0"; }, 2500);
+        }
+
+        btnCopyNotes.onclick = () => {
+            navigator.clipboard.writeText(myNotes.value).then(() => {
+                copyAlert.classList.remove('hidden');
+                setTimeout(() => copyAlert.classList.add('hidden'), 2000);
+            });
+        };
+
+        btnClearNotes.onclick = () => { myNotes.value = ''; handleNoteInput(); };
+        btnPlayAll.onclick = () => { if (isLoopingAll) stopAudio(); else playAllFromStart(); };
+        btnStop.onclick = stopAudio;
+        btnRecord.onclick = toggleRecording;
+        btnPlayRec.onclick = playRecordedAudio;
+        btnSaveNotes.onclick = saveNotesAction;
+        myNotes.oninput = handleNoteInput;
+
+        speedRange.oninput = () => { speedValue.textContent = `${parseFloat(speedRange.value).toFixed(2)}x`; };
+
+        const init = async () => {
+            setupFilenameAndKeys(); 
+            buildScriptUI();
+            buildStaticNotesUI(); 
+            await loadNotes();
+        };
+        window.onload = init;
+    </script>
+</body>
+</html>
