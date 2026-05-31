@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ビジネス英語音読トレーナー - Ex010 (中古ロードバイクの取引とクレーム対応)</title>
+    <!-- Tailwind CSS for high quality layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .highlight { background-color: #fef08a; border-bottom: 2px solid #eab308; }
+        .playing-row { background-color: #f0fdf4; border-left: 4px solid #22c55e; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+    <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        <!-- ヘッダー -->
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-4 mb-6">
+            <div>
+                <span id="exerciseDisplay" class="text-xs font-bold tracking-widest text-indigo-600 uppercase bg-indigo-50 px-2.5 py-1 rounded-md">Exercise 010</span>
+                <h1 class="text-2xl font-bold text-slate-900 mt-1">中古自転車の取引とクレーム対応</h1>
+            </div>
+            <div class="mt-2 sm:mt-0 text-sm text-slate-500 font-medium">
+                対象ファイル名: <code id="filenameDisplay" class="bg-slate-100 px-1.5 py-0.5 rounded text-indigo-600 font-mono text-xs">kindoku_Ex010.html</code>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- 左・中央エリア：音読メインコントロール -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- コントロールパネル -->
+                <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/60 space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <!-- 再生・停止 -->
+                        <div class="flex items-center gap-2">
+                            <button id="btnPlayAll" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl shadow-sm transition flex items-center gap-2">
+                                <span>[再生] 全文再生</span>
+                            </button>
+                            <button id="btnStop" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium rounded-xl transition">
+                                [停止]
+                            </button>
+                        </div>
+
+                        <!-- 音声タイプ（男性・女性）選択 -->
+                        <div class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200/40 min-w-[180px]">
+                            <label for="voiceSelect" class="text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Voice:</label>
+                            <select id="voiceSelect" class="bg-transparent font-semibold text-slate-700 focus:outline-none text-xs cursor-pointer w-full max-w-[200px]">
+                                <option value="">(音声読み込み中...)</option>
+                            </select>
+                        </div>
+
+                        <!-- モード切替 -->
+                        <div class="flex items-center gap-2">
+                            <label class="relative inline-flex items-center cursor-pointer select-none">
+                                <input type="checkbox" id="modeToggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                                <span class="ml-2 text-sm font-medium text-slate-700">1文ごとに自動停止</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 自由スピード調整スライダー -->
+                    <div class="bg-slate-50/70 p-4 rounded-xl border border-slate-200/40 flex flex-col sm:flex-row items-center gap-4">
+                        <div class="w-full flex items-center justify-between sm:w-auto gap-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Speed:</span>
+                            <span id="speedValue" class="text-sm font-mono font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">1.00x</span>
+                        </div>
+                        <input type="range" id="speedRange" min="0.5" max="2.0" step="0.05" value="1.0" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 focus:outline-none">
+                    </div>
+
+                    <!-- 録音・フィードバックパネル -->
+                    <div class="border-t border-slate-100 pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <button id="btnRecord" class="px-5 py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl shadow-md shadow-rose-100 transition flex items-center justify-center gap-2 min-w-[140px]">
+                                <span id="recIcon">[REC]</span> <span id="recText">録音スタート</span>
+                            </button>
+                            <button id="btnPlayRec" disabled class="px-4 py-3 bg-slate-100 text-slate-400 font-medium rounded-xl transition flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed">
+                                [声再生] 自分の声を聴く
+                            </button>
+                        </div>
+                        <div id="recStatus" class="text-xs font-semibold text-slate-400 flex items-center gap-1.5 px-3 py-2 bg-slate-50 rounded-lg border border-slate-200/30">
+                            <span class="w-2 h-2 rounded-full bg-slate-300 block" id="statusDot"></span>
+                            <span id="statusText">マイク待機中</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 英文・日本文本体エリア -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
+                    <div class="p-4 bg-slate-50/80 border-b border-slate-100 flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-400 tracking-wider uppercase">Training Workspace</span>
+                        <span class="text-xs text-slate-500">ブロックをクリックすると、そのパートだけお手本再生できます</span>
+                    </div>
+                    
+                    <div id="scriptContainer" class="divide-y divide-slate-100">
+                        <!-- JavaScriptで動的生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右エリア：学習サポートサイドバー -->
+            <div class="space-y-6 max-h-[85vh] overflow-y-auto pr-1">
+                <!-- 語注エリア -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4">
+                    <h3 class="font-bold text-slate-900 text-base border-b border-slate-100 pb-2">
+                        [徹底解説・重要語注]
+                    </h3>
+                    
+                    <!-- 【広告】語注 -->
+                    <div>
+                        <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-2">【広告の重要語彙】</h4>
+                        <div class="space-y-2 text-xs leading-relaxed text-slate-600 max-h-[180px] overflow-y-auto pr-1 border-b border-slate-100 pb-3">
+                            <p><strong>bike</strong> [名] 自転車</p>
+                            <p><strong>excellent</strong> [形] 素晴らしい、とても良い</p>
+                            <p><strong>meticulously</strong> [副] 入念に、きちんと</p>
+                            <p><strong>maintain</strong> [動] 維持管理する</p>
+                            <p><strong>high-performance</strong> [形] 高性能の</p>
+                            <p><strong>key</strong> [形] 主要な</p>
+                            <p><strong>feature</strong> [名] 特徴</p>
+                            <p><strong>include</strong> [動] 含む</p>
+                            <p><strong>lightweight</strong> [形] 軽量の</p>
+                            <p><strong>reliable</strong> [形] 信頼できる</p>
+                            <p><strong>recently</strong> [副] 最近</p>
+                            <p><strong>service</strong> [動] 点検する、整備する</p>
+                            <p><strong>brand-new</strong> [形] 新品の、真新しい</p>
+                            <p><strong>negotiable</strong> [形] 交渉可能な</p>
+                            <p><strong>own</strong> [動] 所有する</p>
+                            <p><strong>contact</strong> [動] 連絡する</p>
+                            <p><strong>deliver</strong> [動] 届ける</p>
+                            <p><strong>please note that</strong> 〜をご承知おきください</p>
+                            <p><strong>all sales are final</strong> 返品・返金不可</p>
+                            <p><strong>exchange</strong> [動] 交換する</p>
+                            <p><strong>measure up to expectations</strong> 期待に応える</p>
+                            <p><strong>delivery</strong> [名] 配達</p>
+                        </div>
+                    </div>
+
+                    <!-- 【1通目のメール】語注 -->
+                    <div class="border-t border-slate-100 pt-3">
+                        <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-2">【1通目のメールの重要語彙】</h4>
+                        <div class="space-y-2 text-xs leading-relaxed text-slate-600 max-h-[180px] overflow-y-auto pr-1 border-b border-slate-100 pb-3">
+                            <p><strong>purchase</strong> [動] 購入する</p>
+                            <p><strong>advertise</strong> [動] 宣伝する</p>
+                            <p><strong>asking price</strong> 希望価格</p>
+                            <p><strong>particular</strong> [形] 特定の</p>
+                            <p><strong>disappointed</strong> [形] がっかりしている</p>
+                            <p><strong>as</strong> [接] 〜なので</p>
+                            <p><strong>match</strong> [動] 合う、合致する</p>
+                            <p><strong>description</strong> [名] 説明</p>
+                            <p><strong>nor</strong> [接] 〜もない</p>
+                            <p><strong>accompany</strong> [動] 添える</p>
+                            <p><strong>state</strong> [動] 述べる</p>
+                            <p><strong>overall</strong> [形] 全体の</p>
+                            <p><strong>this is not the case</strong> そうではない</p>
+                            <p><strong>actually</strong> [副] 実際</p>
+                            <p><strong>noticeable</strong> [形] 明らかな</p>
+                            <p><strong>scratch</strong> [名] ひっかき傷</p>
+                            <p><strong>scuff</strong> [名] 擦り傷</p>
+                            <p><strong>though</strong> [接] 〜だが</p>
+                            <p><strong>appear</strong> [動] 〜のように見える</p>
+                            <p><strong>worn</strong> [形] 使い古した</p>
+                            <p><strong>while</strong> [接] 〜する一方で</p>
+                            <p><strong>used item</strong> 中古品</p>
+                            <p><strong>generally</strong> [副] 一般的に、通常</p>
+                            <p><strong>wear and tear</strong> 摩耗</p>
+                            <p><strong>discrepancy</strong> [名] 食い違い</p>
+                            <p><strong>significant</strong> [形] 大きな、かなりの</p>
+                            <p><strong>review</strong> [動] 検討する</p>
+                            <p><strong>fair</strong> [形] 公正な</p>
+                            <p><strong>resolution</strong> [名] 解決策</p>
+                            <p><strong>reach</strong> [動] 連絡する</p>
+                            <p><strong>via</strong> [前] 〜経由で</p>
+                        </div>
+                    </div>
+
+                    <!-- 【2通目のメール】語注 -->
+                    <div class="border-t border-slate-100 pt-3">
+                        <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-2">【2通目のメールの重要語彙】</h4>
+                        <div class="space-y-2 text-xs leading-relaxed text-slate-600 max-h-[180px] overflow-y-auto pr-1 border-b border-slate-100 pb-3">
+                            <p><strong>apologize</strong> [動] お詫びする</p>
+                            <p><strong>regarding</strong> [前] 〜に関する</p>
+                            <p><strong>including</strong> [前] 〜を含む</p>
+                            <p><strong>oversight</strong> [名] 見落とし</p>
+                            <p><strong>missing</strong> [形] 足りない</p>
+                            <p><strong>ensure</strong> [動] 保証する</p>
+                            <p><strong>accurate</strong> [形] 正確な</p>
+                            <p><strong>representation</strong> [名] 描写</p>
+                            <p><strong>high priority</strong> 最優先事項</p>
+                            <p><strong>address</strong> [動] 対処する</p>
+                            <p><strong>agreeable</strong> [形] 納得できる</p>
+                            <p><strong>as for</strong> 〜に関しては</p>
+                            <p><strong>resolve</strong> [動] 解決する</p>
+                            <p><strong>in accordance with</strong> 〜に従って</p>
+                            <p><strong>policy</strong> [名] 規定</p>
+                            <p><strong>alternatively</strong> [副] もしくは</p>
+                            <p><strong>reply</strong> [動] 返答する</p>
+                            <p><strong>preference</strong> [名] 希望</p>
+                            <p><strong>further</strong> [形] さらなる</p>
+                            <p><strong>detail</strong> [名] 詳細</p>
+                        </div>
+                    </div>
+
+                    <!-- 【設問・選択肢】語注 -->
+                    <div class="border-t border-slate-100 pt-3">
+                        <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-2">【設問・選択肢の重要語彙】</h4>
+                        <div class="space-y-2 text-xs leading-relaxed text-slate-600">
+                            <p><strong>unknown</strong> [形] 無名の</p>
+                            <p><strong>adjust</strong> [動] 調整する</p>
+                            <p><strong>suitable</strong> [形] 適している</p>
+                            <p><strong>mountain biking</strong> 山道でのサイクリング</p>
+                            <p><strong>fold</strong> [動] 折りたたむ</p>
+                            <p><strong>storage</strong> [名] 保管</p>
+                            <p><strong>inaccurate</strong> [形] 不正確な</p>
+                            <p><strong>misleading</strong> [形] 誤解を招く</p>
+                            <p><strong>uncomfortable</strong> [形] 心地よくない</p>
+                            <p><strong>frequent customer</strong> 常連客</p>
+                            <p><strong>satisfied</strong> [形] 満足している</p>
+                            <p><strong>describe</strong> [動] 説明する、描写する</p>
+                            <p><strong>correctly</strong> [副] 正しく</p>
+                            <p><strong>promote</strong> [動] 促進する</p>
+                            <p><strong>based on</strong> 〜に基づいて</p>
+                            <p><strong>be familiar with</strong> 〜をよく知っている</p>
+                            <p><strong>safety regulations</strong> 安全規則</p>
+                            <p><strong>voucher</strong> [名] 無料券</p>
+                            <p><strong>patch</strong> [動] （傷んだ部分に）継ぎを当てる</p>
+                            <p><strong>partial</strong> [形] 一部の、部分的な</p>
+                            <p><strong>refund</strong> [名] 返金</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- マイコメント / 学習メモカード -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                        <h3 class="font-bold text-slate-900 text-base">
+                            [マイコメント / 学習メモ]
+                        </h3>
+                        <span id="saveStatus" class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded transition-all duration-300 opacity-0">保存完了</span>
+                    </div>
+                    
+                    <!-- コード直接記述メモ -->
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider">[固定の学習メモ(コード同期)]</h4>
+                        <ul id="staticNotesList" class="list-disc list-outside pl-4 text-xs text-slate-700 space-y-1.5 leading-relaxed">
+                            <!-- JS側で定義された配列から動的出力 -->
+                        </ul>
+                    </div>
+
+                    <!-- その場の一時メモ記入エリア -->
+                    <div class="space-y-3 pt-3 border-t border-slate-100">
+                        <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider">[その場の一時メモ]</h4>
+                        <p class="text-[11px] text-slate-400 leading-relaxed">
+                            ※この記入欄は、お使いのブラウザに一時的に保存されます。
+                        </p>
+                        <textarea id="myNotes" rows="5" class="w-full p-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-slate-400" placeholder="その場で気付いたことの一時的なメモに使えます。"></textarea>
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="btnSaveNotes" class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-[0.98]">
+                                メモを保存する
+                            </button>
+                            <button id="btnCopyNotes" class="py-2.5 px-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs font-bold rounded-xl transition-all">
+                                メモをコピー
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1">
+                            <button id="btnClearNotes" class="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-500 text-xs font-semibold rounded-xl transition-all">
+                                クリア
+                            </button>
+                        </div>
+                        <div id="copyAlert" class="text-[11px] text-emerald-600 font-semibold text-center hidden">
+                            コピーしました！クリップボードに保存されています。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK / アプリ主要ロジック -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // =========================================================================
+        // 【固定メモ（コード同期）の編集エリア】
+        // =========================================================================
+        const staticNotes = [
+            "meticulously maintained (入念に維持管理された)",
+            "all sales are final (返品・返金不可)",
+            "measure up to expectations (期待に応える、期待に沿う)",
+            "this is not actually the case (実際にはそうではない)",
+            "noticeable scratches and scuffs (目立つ傷や擦り傷)",
+            "used items generally have some wear and tear (中古品には通常多少の摩耗や傷みがある)",
+            "discrepancies between the advertisement and the product (広告と商品の間の食い違い)",
+            "discuss a fair resolution (公正な解決策を話し合う)",
+            "apologize for any discrepancies (いかなる相違についても謝罪する)",
+            "address this matter in a way that is agreeable to you (ご納得いただける方法でこの問題に対処する)",
+            "in accordance with our store policy (当店の規定・ポリシーに従って)"
+        ];
+
+        // --- 英文・日本語データ定義 ---
+        const speechData = [
+            {
+                role: "advertisement",
+                meta: "Ad Title",
+                speakerName: "FOR SALE",
+                en: "FOR SALE: Used Trekkle Road Bike in Excellent Condition",
+                ja: "売ります：コンディションの良い中古トレックル・ロードバイク"
+            },
+            {
+                role: "advertisement",
+                meta: "Ad Detail 1",
+                speakerName: "FOR SALE",
+                en: "We are offering a meticulously maintained, high-performance road bike made by Trekkle. It is green with thin white stripes. Key features include a lightweight carbon fiber frame, 24 gears, and reliable Formollo Tech brakes.",
+                ja: "丁寧にメンテナンスされたトレックル製の高性能ロードバイクを販売中です。グリーンの車体に細いホワイトストライプ入り。軽量カーボンファイバーフレーム、24 段変速ギア、信頼性の高いフォーモロテック製ブレーキが主な特徴です。"
+            },
+            {
+                role: "advertisement",
+                meta: "Ad Detail 2",
+                speakerName: "FOR SALE",
+                en: "The bike has recently been serviced and is in excellent condition. It comes with a cable lock, a powerful dual-beam headlamp and single-beam taillight, and a brand-new saddle.",
+                ja: "最近整備されたばかりで、コンディションは良好です。ケーブルロック、強力なデュアルビーム・ヘッドライトとシングルビーム・テールライト、新品のサドルが付属。"
+            },
+            {
+                role: "advertisement",
+                meta: "Ad Detail 3",
+                speakerName: "FOR SALE",
+                en: "We are asking only $350, but the price is negotiable. Don’t miss this chance to own a beautiful Trekkle.",
+                ja: "お値段はお得な 350 ドルですが、応交渉です。美しいトレックルを所有するこのチャンスをお見逃しなく。"
+            },
+            {
+                role: "advertisement",
+                meta: "Ad Footer",
+                speakerName: "FOR SALE",
+                en: "Contact the Cyclers Shop at 555-0184 or support@cyclersshop.com today! We’ll deliver it right to your door. Please note that all sales are final, but we exchange products that do not measure up to expectations or are damaged during delivery.",
+                ja: "サイクラーズショップ（555-0184、support@cyclersshop.com）までご連絡ください! ご自宅までお届けします。返品・返金不可であることをご了承ください。ただし、ご期待に沿えない、あるいは、配送中に破損した製品は交換いたします。"
+            },
+            {
+                role: "email-1",
+                meta: "May 25",
+                speakerName: "Larry Greer",
+                en: "To: support@cyclersshop.com\nFrom: larrygreer@soarmail.com\nSubject: Used Trekkle\n\nDear Cyclers Shop,\n\nI purchased the green Trekkle that you advertised as being in excellent condition, and I paid the full asking price because I really wanted this particular model.",
+                ja: "宛先：support@cyclersshop.com、送信者：larrygreer@soarmail.com、件名：中古トレックル\n\nサイクラーズショップ様\n\n貴店が良好なコンディションと宣伝されていたグリーンのトレックルを購入し、このモデルがすごく欲しかったので、希望の売価を全額お支払いしました。"
+            },
+            {
+                role: "email-1",
+                meta: "Complaint 1",
+                speakerName: "Larry Greer",
+                en: "The bike was delivered today, and I must say that I’m disappointed, as it doesn’t match the description in the ad nor the photo that accompanied it.",
+                ja: "本日、自転車が届きましたが、がっかりしたと言わざるを得ません。広告の説明や添付されていた写真と違うからです。"
+            },
+            {
+                role: "email-1",
+                meta: "Complaint 2",
+                speakerName: "Larry Greer",
+                en: "First, you stated that the overall condition was excellent, but this is not actually the case. There are noticeable scratches and scuffs on the frame, and the saddle, though mentioned as brand-new, appears worn. Second, I did not receive the single-beam light mentioned in the listing.",
+                ja: "まず、貴店は、全体的なコンディションを良好と書かれていましたが、実際はそうではありません。フレームには目立つ傷や擦り傷があり、サドルは新品と記載されていましたが、使い古されているように見えます。次に、リストに記載されていたシングルビームライトが届きませんでした。"
+            },
+            {
+                role: "email-1",
+                meta: "Demand",
+                speakerName: "Larry Greer",
+                en: "While I understand that used items generally have some wear and tear, the discrepancies between the advertisement and the product are significant. So, I request that you review the situation and contact me to discuss a fair resolution. I can be reached at 555-0168 or via this e-mail address.\n\nSincerely,\nLarry Greer",
+                ja: "一般的に中古品には多少の擦れや傷みがあることは理解していますが、広告と商品の違いが大きいです。この状況を確認し、公正な解決策を話し合うためにご連絡いただけますようお願いします。連絡は 555-0168 またはこちらのメールアドレスまでお願いします。敬具 ラリー・グリア"
+            },
+            {
+                role: "email-2",
+                meta: "May 26",
+                speakerName: "Kathy Weaver",
+                en: "To: larrygreer@soarmail.com\nFrom: support@cyclersshop.com\nSubject: RE: Used Trekkle\n\nDear Mr. Greer,\n\nWe apologize for any discrepancies regarding the bicycle’s condition, including the oversights with the missing light and worn saddle.",
+                ja: "宛先：larrygreer@soarmail.com、送信者：support@cyclersshop.com、件名：RE: 中古トレックル\n\nグリア様\n\nライトの欠品や使い古されていたサドルの見落としを含め、自転車の状態に関して相違があったことをお詫び申し上げます。"
+            },
+            {
+                role: "email-2",
+                meta: "Solution 1",
+                speakerName: "Kathy Weaver",
+                en: "Ensuring the accurate representation of our products is a high priority at Cyclers Shop, and we want to address this matter in a way that is agreeable to you.",
+                ja: "製品の正確な表示を保証することはサイクラーズショップの最優先事項であり、ご納得いただける方法でこの問題に対処したいと考えております。"
+            },
+            {
+                role: "email-2",
+                meta: "Solution 2",
+                speakerName: "Kathy Weaver",
+                en: "As for the saddle condition and scratches on the bike itself, we can resolve this in accordance with our store policy. Alternatively, if you would like to keep the bike, we can send the missing light.",
+                ja: "サドルの状態や自転車本体の傷については、当店の規定に従って解決可能です。もしくは、自転車をそのまま保有されることをご希望であれば、足りないライトをお送りすることも可能です。"
+            },
+            {
+                role: "email-2",
+                meta: "Contact",
+                speakerName: "Kathy Weaver",
+                en: "Please give us a call at 555-0184 or reply to this e-mail with your preference and any further details you would like to share.\n\nBest regards,\nKathy Weaver, Cyclers Shop Manager",
+                ja: "ご希望と、他に何かございましたら、555-0184 までお電話いただくか、このメールにご返信ください。よろしくお願いいたします。キャシー・ウィーバー、サイクラーズショップ・マネージャー"
+            }
+        ];
+
+        // --- 状態管理変数 ---
+        const synth = window.speechSynthesis;
+        let currentUtterance = null;
+        let activeIndex = null;
+        let isLoopingAll = false;
+        let speechVoices = [];
+        
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let audioUrl = null;
+        let isRecording = false;
+
+        // --- Firebase関連変数 ---
+        let db = null;
+        let auth = null;
+        let user = null;
+        let appId = 'default-app-id';
+
+        let currentFilename = "kindoku_Ex010.html";
+        let storageKey = "kindoku_notes_Ex010";
+        let cloudDocId = "kindoku_Ex010";
+
+        // --- DOM要素取得 ---
+        const scriptContainer = document.getElementById('scriptContainer');
+        const btnPlayAll = document.getElementById('btnPlayAll');
+        const btnStop = document.getElementById('btnStop');
+        const voiceSelect = document.getElementById('voiceSelect');
+        const speedRange = document.getElementById('speedRange');
+        const speedValue = document.getElementById('speedValue');
+        const modeToggle = document.getElementById('modeToggle');
+        
+        const btnRecord = document.getElementById('btnRecord');
+        const btnPlayRec = document.getElementById('btnPlayRec');
+        const recIcon = document.getElementById('recIcon');
+        const recText = document.getElementById('recText');
+        const recStatus = document.getElementById('recStatus');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+
+        const myNotes = document.getElementById('myNotes');
+        const btnSaveNotes = document.getElementById('btnSaveNotes');
+        const btnCopyNotes = document.getElementById('btnCopyNotes');
+        const btnClearNotes = document.getElementById('btnClearNotes');
+        const copyAlert = document.getElementById('copyAlert');
+        const saveStatus = document.getElementById('saveStatus');
+        const staticNotesList = document.getElementById('staticNotesList');
+
+        function setupFilenameAndKeys() {
+            try {
+                const path = window.location.pathname;
+                const filename = path.substring(path.lastIndexOf('/') + 1);
+                if (filename && filename.includes('.html')) {
+                    currentFilename = filename;
+                    document.getElementById('filenameDisplay').textContent = filename;
+                    const nameWithoutExt = filename.replace('.html', '');
+                    storageKey = `kindoku_notes_${nameWithoutExt}`;
+                    cloudDocId = nameWithoutExt;
+                }
+            } catch (e) {
+                console.error("ファイル名同期エラー:", e);
+            }
+        }
+
+        function buildStaticNotesUI() {
+            staticNotesList.innerHTML = '';
+            staticNotes.forEach(note => {
+                const li = document.createElement('li');
+                li.textContent = note;
+                staticNotesList.appendChild(li);
+            });
+        }
+
+        function loadVoices() {
+            if (!synth) return;
+            const allVoices = synth.getVoices();
+            speechVoices = allVoices.filter(voice => voice.lang.startsWith('en'));
+            if (speechVoices.length === 0) speechVoices = allVoices;
+
+            voiceSelect.innerHTML = '';
+            speechVoices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                let genderTag = "[音声] ";
+                const nameLower = voice.name.toLowerCase();
+                if (nameLower.includes('david') || nameLower.includes('george') || nameLower.includes('male') || nameLower.includes('mark')) {
+                    genderTag = "[男声] ";
+                } else if (nameLower.includes('zira') || nameLower.includes('female') || nameLower.includes('hazel') || nameLower.includes('samantha')) {
+                    genderTag = "[女声] ";
+                }
+                option.textContent = `${genderTag}${voice.name} (${voice.lang})`;
+                voiceSelect.appendChild(option);
+            });
+
+            const preferredIndex = speechVoices.findIndex(v => v.name.includes('Google US English') || v.name.includes('Zira') || v.name.includes('Samantha'));
+            if (preferredIndex !== -1) voiceSelect.value = preferredIndex;
+        }
+
+        if (typeof synth !== 'undefined' && synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = loadVoices;
+        }
+
+        function buildScriptUI() {
+            scriptContainer.innerHTML = '';
+            speechData.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.id = `row-${index}`;
+                row.className = "p-4 sm:p-5 transition-all duration-200 cursor-pointer hover:bg-slate-50/60 flex flex-col gap-1.5";
+                row.onclick = () => playSingleRow(index);
+
+                let badgeClass = "bg-slate-100 text-slate-700";
+                if (item.role === 'advertisement') badgeClass = "bg-emerald-50 text-emerald-700";
+                else if (item.role === 'email-1') badgeClass = "bg-pink-50 text-pink-700";
+                else if (item.role === 'email-2') badgeClass = "bg-sky-50 text-sky-700";
+
+                row.innerHTML = `
+                    <div class="flex items-center gap-2 select-none">
+                        <span class="text-xs font-bold text-slate-400">Section ${index + 1}</span>
+                        <span class="${badgeClass} text-[10px] font-bold px-1.5 py-0.5 rounded">${item.speakerName}</span>
+                        <span class="text-[10px] text-slate-400 font-mono">${item.meta}</span>
+                    </div>
+                    <div class="text-base sm:text-lg font-semibold text-slate-900 leading-relaxed tracking-wide mt-1 whitespace-pre-line" id="en-${index}">
+                        ${item.en}
+                    </div>
+                    <div class="text-xs sm:text-sm text-slate-500 font-medium mt-0.5 whitespace-pre-line">
+                        ${item.ja}
+                    </div>
+                `;
+                scriptContainer.appendChild(row);
+            });
+            loadVoices();
+        }
+
+        function stopAudio() {
+            isLoopingAll = false;
+            synth.cancel();
+            clearVisualHighlights();
+            btnPlayAll.innerHTML = "<span>[再生] 全文再生</span>";
+        }
+
+        function clearVisualHighlights() {
+            speechData.forEach((_, i) => {
+                const r = document.getElementById(`row-${i}`);
+                const e = document.getElementById(`en-${i}`);
+                if (r) r.classList.remove('playing-row');
+                if (e) e.classList.remove('highlight');
+            });
+            activeIndex = null;
+        }
+
+        function highlightRow(index) {
+            clearVisualHighlights();
+            activeIndex = index;
+            const row = document.getElementById(`row-${index}`);
+            const enText = document.getElementById(`en-${index}`);
+            if (row) row.classList.add('playing-row');
+            if (enText) enText.classList.add('highlight');
+            row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function playSingleRow(index) {
+            stopAudio();
+            speakSequence(index, false);
+        }
+
+        function playAllFromStart() {
+            stopAudio();
+            isLoopingAll = true;
+            btnPlayAll.innerHTML = "<span>[一時停止中...]</span>";
+            speakSequence(0, true);
+        }
+
+        function speakSequence(index, continueNext = false) {
+            if (index >= speechData.length || (!isLoopingAll && continueNext)) {
+                stopAudio();
+                return;
+            }
+
+            highlightRow(index);
+            synth.cancel();
+
+            let speakEn = speechData[index].en;
+            currentUtterance = new SpeechSynthesisUtterance(speakEn);
+            
+            if (speechVoices.length > 0 && voiceSelect.value !== "") {
+                const selectedVoice = speechVoices[parseInt(voiceSelect.value)];
+                if (selectedVoice) {
+                    currentUtterance.voice = selectedVoice;
+                    currentUtterance.lang = selectedVoice.lang;
+                }
+            } else {
+                currentUtterance.lang = 'en-US';
+            }
+
+            currentUtterance.rate = parseFloat(speedRange.value);
+
+            currentUtterance.onend = () => {
+                if (continueNext && isLoopingAll) {
+                    if (modeToggle.checked) {
+                        btnPlayAll.innerHTML = "<span>[再生] 全文再生</span>";
+                        isLoopingAll = false; 
+                    } else {
+                        speakSequence(index + 1, true);
+                    }
+                } else if (!continueNext) {
+                    clearVisualHighlights();
+                }
+            };
+
+            currentUtterance.onerror = () => {
+                clearVisualHighlights();
+            };
+
+            synth.speak(currentUtterance);
+        }
+
+        async function toggleRecording() {
+            if (!isRecording) {
+                audioChunks = [];
+                try {
+                    synth.cancel(); 
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                        audioUrl = URL.createObjectURL(audioBlob);
+                        btnPlayRec.disabled = false;
+                        btnPlayRec.className = "px-4 py-3 bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-medium rounded-xl transition flex items-center justify-center gap-1";
+                    };
+                    mediaRecorder.start();
+                    isRecording = true;
+                    recIcon.textContent = "[STOP]";
+                    recText.textContent = "録音を停止";
+                    btnRecord.classList.replace('bg-rose-500', 'bg-slate-800');
+                    statusDot.classList.replace('bg-slate-300', 'bg-rose-500');
+                    statusDot.classList.add('animate-ping');
+                    statusText.textContent = "マイク録音中...";
+                } catch (err) {
+                    alert("マイクが見つからないかアクセスが拒否されました。");
+                }
+            } else {
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                }
+                isRecording = false;
+                recIcon.textContent = "[REC]";
+                recText.textContent = "録音スタート";
+                btnRecord.classList.replace('bg-slate-800', 'bg-rose-500');
+                statusDot.classList.remove('animate-ping');
+                statusDot.classList.replace('bg-rose-500', 'bg-emerald-500');
+                statusText.textContent = "録音保存完了";
+            }
+        }
+
+        function playRecordedAudio() {
+            if (audioUrl) {
+                synth.cancel();
+                new Audio(audioUrl).play();
+            }
+        }
+
+        function isLocalStorageAvailable() {
+            try { const k = '__t__'; localStorage.setItem(k, k); localStorage.removeItem(k); return true; }
+            catch (e) { return false; }
+        }
+
+        async function loadNotes() {
+            if (isLocalStorageAvailable()) {
+                const localData = localStorage.getItem(storageKey);
+                if (localData !== null) myNotes.value = localData;
+            }
+        }
+
+        async function saveNotesAction() {
+            const text = myNotes.value;
+            if (isLocalStorageAvailable()) {
+                localStorage.setItem(storageKey, text);
+                showSaveStatus("保存完了(ブラウザ保存)");
+            }
+        }
+
+        function handleNoteInput() {
+            const text = myNotes.value;
+            if (isLocalStorageAvailable()) localStorage.setItem(storageKey, text);
+        }
+
+        function showSaveStatus(text) {
+            saveStatus.textContent = text;
+            saveStatus.className = "text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded transition-all duration-300 opacity-100";
+            setTimeout(() => { saveStatus.className = "text-[10px] font-bold opacity-0"; }, 2500);
+        }
+
+        btnCopyNotes.onclick = () => {
+            navigator.clipboard.writeText(myNotes.value).then(() => {
+                copyAlert.classList.remove('hidden');
+                setTimeout(() => copyAlert.classList.add('hidden'), 2000);
+            });
+        };
+
+        btnClearNotes.onclick = () => { myNotes.value = ''; handleNoteInput(); };
+        btnPlayAll.onclick = () => { if (isLoopingAll) stopAudio(); else playAllFromStart(); };
+        btnStop.onclick = stopAudio;
+        btnRecord.onclick = toggleRecording;
+        btnPlayRec.onclick = playRecordedAudio;
+        btnSaveNotes.onclick = saveNotesAction;
+        myNotes.oninput = handleNoteInput;
+
+        speedRange.oninput = () => { speedValue.textContent = `${parseFloat(speedRange.value).toFixed(2)}x`; };
+
+        const init = async () => {
+            setupFilenameAndKeys(); 
+            buildScriptUI();
+            buildStaticNotesUI(); 
+            await loadNotes();
+        };
+        window.onload = init;
+    </script>
+</body>
+</html>
