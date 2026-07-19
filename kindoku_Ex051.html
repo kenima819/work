@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ビジネス英語音読トレーナー - Chorlton Vinyl 編</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700&family=Playfair+Display:ital,wght@0,600;0,800;1,600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
+        }
+        .vintage-title {
+            font-family: 'Playfair Display', 'Noto Sans JP', serif;
+        }
+        .highlight { 
+            background-color: #fef3c7; 
+            border-bottom: 2px solid #d97706; 
+        }
+        .playing-row { 
+            background-color: #fdf8f2; 
+            border-left: 4px solid #b45309; 
+        }
+    </style>
+</head>
+<body class="bg-[#faf8f5] text-slate-800 min-h-screen">
+
+    <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        <!-- ヘッダーエリア -->
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-amber-200 pb-5 mb-6">
+            <div>
+                <span id="exerciseDisplay" class="text-xs font-bold tracking-widest text-amber-800 bg-amber-100/60 px-3 py-1 rounded-md uppercase">Exercise 050</span>
+                <h1 class="text-3xl font-extrabold text-slate-900 mt-2 vintage-title">Chorlton Vinyl <span class="italic text-amber-800 font-semibold">音読トレーニング</span></h1>
+            </div>
+            <div class="mt-3 sm:mt-0 text-sm text-slate-500 font-medium flex flex-col items-end gap-1">
+                <div>対象ファイル名: <code id="filenameDisplay" class="bg-amber-100/30 px-2 py-0.5 rounded text-amber-800 font-mono text-xs">kindoku_Chorlton.html</code></div>
+                <div class="text-[11px] text-amber-600/80">Premium Vintage Audio Theme</div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- 左・中央エリア：音読メインコントロール -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- コントロールパネル -->
+                <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-amber-100/70 space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <!-- 再生・停止 -->
+                        <div class="flex items-center gap-2">
+                            <button id="btnPlayAll" class="px-5 py-2.5 bg-gradient-to-r from-amber-700 to-amber-900 hover:from-amber-800 hover:to-amber-950 text-white font-medium rounded-xl shadow-md shadow-amber-900/10 transition flex items-center gap-2 active:scale-95">
+                                <span class="w-2.5 h-2.5 bg-white rounded-full inline-block animate-pulse"></span>
+                                <span>[再生] 全文再生</span>
+                            </button>
+                            <button id="btnStop" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition active:scale-95">
+                                [停止]
+                            </button>
+                        </div>
+
+                        <!-- 音声タイプ選択 -->
+                        <div class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200/40 min-w-[180px]">
+                            <label for="voiceSelect" class="text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Voice:</label>
+                            <select id="voiceSelect" class="bg-transparent font-semibold text-slate-700 focus:outline-none text-xs cursor-pointer w-full max-w-[200px]">
+                                <option value="">(音声読み込み中...)</option>
+                            </select>
+                        </div>
+
+                        <!-- モード切替 -->
+                        <div class="flex items-center gap-2">
+                            <label class="relative inline-flex items-center cursor-pointer select-none">
+                                <input type="checkbox" id="modeToggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-700"></div>
+                                <span class="ml-2 text-sm font-medium text-slate-700">1文ごとに自動停止</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- スピード調整スライダー -->
+                    <div class="bg-amber-50/20 p-4 rounded-xl border border-amber-100/30 flex flex-col sm:flex-row items-center gap-4">
+                        <div class="w-full flex items-center justify-between sm:w-auto gap-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Speed:</span>
+                            <span id="speedValue" class="text-sm font-mono font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded">1.00x</span>
+                        </div>
+                        <input type="range" id="speedRange" min="0.5" max="2.0" step="0.05" value="1.0" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-700 focus:outline-none">
+                    </div>
+
+                    <!-- 録音・フィードバックパネル -->
+                    <div class="border-t border-slate-100 pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <button id="btnRecord" class="px-5 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-md shadow-red-150 transition flex items-center justify-center gap-2 min-w-[140px] active:scale-95">
+                                <span id="recIcon">●</span> <span id="recText">録音スタート</span>
+                            </button>
+                            <button id="btnPlayRec" disabled class="px-4 py-3 bg-slate-100 text-slate-400 font-medium rounded-xl transition flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95">
+                                <span>[声再生] 自分の声を聴く</span>
+                            </button>
+                        </div>
+                        <div id="recStatus" class="text-xs font-semibold text-slate-400 flex items-center gap-1.5 px-3 py-2 bg-slate-50 rounded-lg border border-slate-200/30">
+                            <span class="w-2 h-2 rounded-full bg-slate-300 block" id="statusDot"></span>
+                            <span id="statusText">マイク待機中</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 英文・日本文本体エリア -->
+                <div class="bg-white rounded-2xl shadow-sm border border-amber-100/70 overflow-hidden">
+                    <div class="p-4 bg-amber-50/40 border-b border-amber-100/50 flex justify-between items-center">
+                        <span class="text-xs font-bold text-amber-900 tracking-wider uppercase">Training Workspace</span>
+                        <span class="text-xs text-slate-500">文をクリックすると、その文だけをお手本再生できます</span>
+                    </div>
+                    
+                    <div id="scriptContainer" class="divide-y divide-slate-100">
+                        <!-- JavaScriptで動的生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右エリア：学習サポートサイドバー -->
+            <div class="space-y-6 max-h-[85vh] overflow-y-auto pr-1">
+                <!-- 語注エリア -->
+                <div class="bg-white rounded-2xl p-5 border border-amber-100/70 shadow-sm space-y-4">
+                    <h3 class="font-bold text-slate-900 text-base border-b border-slate-100 pb-2 flex items-center justify-between">
+                        <span>[徹底解説・重要語注]</span>
+                        <span class="text-[11px] text-amber-800 font-bold bg-amber-50 px-2 py-0.5 rounded">All-In-One Glossary</span>
+                    </h3>
+                    
+                    <!-- 【広告】語注 -->
+                    <div>
+                        <h4 class="text-xs font-bold text-amber-850 bg-amber-50 px-2 py-1 rounded-md uppercase tracking-wider mb-2">[求人広告の重要語彙]</h4>
+                        <div class="space-y-2 text-xs leading-relaxed text-slate-600 max-h-[220px] overflow-y-auto pr-1 border-b border-slate-100 pb-3">
+                            <p><strong>vinyl</strong> [名] レコード盤</p>
+                            <p><strong>specialize</strong> [動] 専門とする</p>
+                            <p><strong>decade</strong> [名] 10年</p>
+                            <p><strong>look for</strong> [連] 〜を探す</p>
+                            <p><strong>possess</strong> [動] 保有する</p>
+                            <p><strong>excellent</strong> [形] 優れた</p>
+                            <p><strong>organizational</strong> [形] 組織化の、組織的な</p>
+                            <p><strong>ability</strong> [名] 能力</p>
+                            <p><strong>successful candidate</strong> [名] 合格する候補者、合格者</p>
+                            <p><strong>oversee</strong> [動] 監督する、統括する</p>
+                            <p><strong>operation</strong> [名] 業務</p>
+                            <p><strong>manage</strong> [動] 管理する</p>
+                            <p><strong>inventory</strong> [名] 在庫</p>
+                            <p><strong>procure</strong> [動] 調達する</p>
+                            <p><strong>both X and Y</strong> [連] XもYも</p>
+                            <p><strong>additionally</strong> [副] 加えて</p>
+                            <p><strong>aspect</strong> [名] 面</p>
+                            <p><strong>production</strong> [名] 生産、製造</p>
+                            <p><strong>including</strong> [前] 〜を含む</p>
+                            <p><strong>press</strong> [動] （レコードを）プレスする、製造する</p>
+                            <p><strong>as well as</strong> [連] 〜に加えて、〜と同様に</p>
+                            <p><strong>affect</strong> [動] 影響する</p>
+                            <p><strong>qualification</strong> [名] 資格</p>
+                            <p><strong>role</strong> [名] 役割</p>
+                            <p><strong>include</strong> [動] 含む</p>
+                            <p><strong>minimum</strong> [名] 最低限</p>
+                            <p><strong>retail</strong> [名] 小売り</p>
+                            <p><strong>management</strong> [名] 管理</p>
+                            <p><strong>contribute</strong> [動] 貢献する</p>
+                            <p><strong>legacy</strong> [名] レガシー、過去から未来へ受け継がれるもの</p>
+                            <p><strong>invite</strong> [動] 求める</p>
+                            <p><strong>apply</strong> [動] 応募する</p>
+                            <p><strong>keep X alive</strong> [連] Xを存続させる</p>
+                            <p><strong>résumé</strong> [名] 履歴書</p>
+                        </div>
+                    </div>
+
+                    <!-- 【記事】語注 -->
+                    <div class="pt-1">
+                        <h4 class="text-xs font-bold text-amber-850 bg-amber-50 px-2 py-1 rounded-md uppercase tracking-wider mb-2">[お宝発見ニュースの重要語彙]</h4>
+                        <div class="space-y-2 text-xs leading-relaxed text-slate-600 max-h-[220px] overflow-y-auto pr-1 border-b border-slate-100 pb-3">
+                            <p><strong>strike gold</strong> [連] 金を掘り当てる、大金を儲ける</p>
+                            <p><strong>a stroke of luck</strong> [連] 思いがけない幸運</p>
+                            <p><strong>uncover</strong> [動] 発見する</p>
+                            <p><strong>native</strong> [名] 出身者</p>
+                            <p><strong>extraordinary</strong> [形] 途方もない、けた外れの</p>
+                            <p><strong>find</strong> [名] 発見、掘り出し物</p>
+                            <p><strong>valued at</strong> [連] 〜の価値があると評価された</p>
+                            <p><strong>talk of the town</strong> [連] 町中の噂</p>
+                            <p><strong>avid</strong> [形] 熱心な</p>
+                            <p><strong>stumble upon</strong> [連] 〜を偶然見つける</p>
+                            <p><strong>treasure</strong> [名] 宝物</p>
+                            <p><strong>very few</strong> [連] ほとんどない</p>
+                            <p><strong>copy</strong> [名] （レコードの）枚</p>
+                            <p><strong>talent</strong> [名] 才能を持つ人</p>
+                            <p><strong>get one’s hands on</strong> [連] 〜を手に入れる</p>
+                            <p><strong>influence</strong> [動] 影響を与える [名] 影響を与えるもの</p>
+                            <p><strong>poignant</strong> [形] 心に刺さる</p>
+                            <p><strong>lyrics</strong> [名] 歌詞</p>
+                            <p><strong>soulful</strong> [形] 魂のこもった</p>
+                            <p><strong>reveal</strong> [動] 明らかにする</p>
+                            <p><strong>insight</strong> [名] 洞察、深い気づき</p>
+                            <p><strong>treat</strong> [動] もてなす</p>
+                            <p><strong>patron</strong> [名] 常連客、愛用者</p>
+                            <p><strong>intimate</strong> [形] 親密な、距離が近い</p>
+                        </div>
+                    </div>
+
+                    <!-- 【ハガキ・設問他】語注 -->
+                    <div class="pt-1">
+                        <h4 class="text-xs font-bold text-amber-850 bg-amber-50 px-2 py-1 rounded-md uppercase tracking-wider mb-2">[ハガキ広告＆その他設問語彙]</h4>
+                        <div class="space-y-2 text-xs leading-relaxed text-slate-600 max-h-[220px] overflow-y-auto pr-1">
+                            <p><strong>new arrival</strong> [名] 新入荷</p>
+                            <p><strong>explore</strong> [動] 探る</p>
+                            <p><strong>latest</strong> [形] 最新の</p>
+                            <p><strong>addition</strong> [名] 追加、加わったもの</p>
+                            <p><strong>extensive</strong> [形] 幅広い</p>
+                            <p><strong>feature</strong> [動] 目玉にする</p>
+                            <p><strong>timeless classics</strong> [名] 時代を超えた名作</p>
+                            <p><strong>present</strong> [動] 提示する</p>
+                            <p><strong>purchase</strong> [名] 購入</p>
+                            <p><strong>terms and conditions</strong> [名] 利用規約、諸条件</p>
+                            <p><strong>valid</strong> [形] 有効な</p>
+                            <p><strong>per</strong> [前] 〜につき</p>
+                            <p><strong>apply</strong> [動] 適用される</p>
+                            <p><strong>upcoming</strong> [形] 今度の</p>
+                            <p><strong>necessary</strong> [形] 必要な</p>
+                            <p><strong>degree</strong> [名] 学位</p>
+                            <p><strong>business administration</strong> [名] 経営</p>
+                            <p><strong>proficiency</strong> [名] スキルの高さ、熟達</p>
+                            <p><strong>previous</strong> [形] 以前の</p>
+                            <p><strong>managerial position</strong> [名] マネージャー職、管理職</p>
+                            <p><strong>conclude</strong> [動] 結論付ける</p>
+                            <p><strong>knowledgeable</strong> [形] 知識が豊富な</p>
+                            <p><strong>hire</strong> [動] 雇う</p>
+                            <p><strong>direct</strong> [動] 向ける</p>
+                            <p><strong>view</strong> [動] 眺める</p>
+                            <p><strong>current</strong> [形] 現在の</p>
+                            <p><strong>infer</strong> [動] 推測する</p>
+                            <p><strong>influential</strong> [形] 影響力のある</p>
+                            <p><strong>exclude</strong> [動] 除外する</p>
+                            <p><strong>remain</strong> [動] 〜のままでいる</p>
+                            <p><strong>of all time</strong> [連] 史上</p>
+                            <p><strong>praise</strong> [動] ほめる、称賛する</p>
+                            <p><strong>electronic</strong> [形] 電子の</p>
+                            <p><strong>element</strong> [名] 要素</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- マイコメント / 学習メモカード -->
+                <div class="bg-white rounded-2xl p-5 border border-amber-100/70 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                        <h3 class="font-bold text-slate-900 text-base">
+                            [マイコメント / 学習メモ]
+                        </h3>
+                        <span id="saveStatus" class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded transition-all duration-300 opacity-0">保存完了</span>
+                    </div>
+                    
+                    <!-- 発音リンキング情報エリア -->
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-bold text-amber-800 uppercase tracking-wider">[重要リンキング・発音解説]</h4>
+                        <ul id="staticNotesList" class="list-disc list-outside pl-4 text-xs text-slate-700 space-y-1.5 leading-relaxed">
+                            <!-- JS内の「staticNotes」配列データが自動生成されます -->
+                        </ul>
+                    </div>
+
+                    <!-- その場の一時メモ記入エリア -->
+                    <div class="space-y-3 pt-3 border-t border-slate-100">
+                        <h4 class="text-xs font-bold text-amber-800 uppercase tracking-wider">[その場の一時メモ]</h4>
+                        <p class="text-[11px] text-slate-400 leading-relaxed">
+                            ※この入力内容はブラウザに自動的・一時的にバックアップされます。
+                        </p>
+                        <textarea id="myNotes" rows="5" class="w-full p-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 placeholder-slate-400" placeholder="リンキングの気づきや自身の苦手な箇所のメモ書きなどにお使いください。"></textarea>
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="btnSaveNotes" class="py-2.5 px-3 bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95">
+                                メモを保存する
+                            </button>
+                            <button id="btnCopyNotes" class="py-2.5 px-3 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold rounded-xl transition-all">
+                                メモをコピー
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1">
+                            <button id="btnClearNotes" class="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-500 text-xs font-semibold rounded-xl transition-all">
+                                クリア
+                            </button>
+                        </div>
+                        <div id="copyAlert" class="text-[11px] text-emerald-600 font-semibold text-center hidden">
+                            コピーしました！クリップボードに保存されています。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK / アプリケーション主要ロジック -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // =========================================================================
+        // 💡 【重要リンキング・発音解説メモの編集エリア】
+        // 常に画面に表示しておきたい代表的な解説情報です。
+        // =========================================================================
+        const staticNotes = [
+            "specializes in ➔ スペシャライズ・イン（specializesの末尾s[z]とinがスムーズに連結）",
+            "for over ➔ フォー・オウヴァー（forのr音とover[óuvər]が途切れることなく滑らかに繋がります）",
+            "part of the ➔ パータヴ・ザ（partのtとof[əv]がリンキング。さらにofのvとtheが流れます）",
+            "looking for someone ➔ ルッキング・ファ・サムワン（forは極めて弱化し、「ファ」のように発音されます）",
+            "candidate will ➔ キャンディデイト・ウィル（candidateの語尾tが軽く閉鎖音となり、willへと移行します）",
+            "pressing techniques as well as ➔ プレスィング・テクニークス・アズ・ウェラズ（as well asは全体で「アズウェラズ」のように一息に言います）",
+            "types of vinyl ➔ タイプソヴ・ヴァイナル（typesのs音とofが結合して「タイプソヴ」のように聞こえます）",
+            "affect sound quality ➔ アフェクトゥ・サウン・クオリティ（soundのdは脱落しがちになります）",
+            "five years in ➔ ファイヴ・イヤーズィン（yearsの末尾[z]がinとリンキング）",
+            "ready to contribute ➔ レディ・トゥ・コントリビュー（readyの末尾の母音からtoへそのまま滑らかに渡します）",
+            "apply now ➔ アプライ・ナウ（yの余韻からnowへ一息に繋ぎます）",
+            "spirit of vinyl ➔ スピリット・オヴ・ヴァイナル（spiritのtとofが結合）",
+            "Send your ➔ セン・ユア（Sendのdが半ば脱落し、yourと結合して「センユア」に聞こえます）",
+            "uncovered a ➔ アンカヴァーダ（uncoveredのdとaが連結）",
+            "valued at ➔ ヴァリュードゥ・アット（valuedのdとatが連結して「ヴァリュードァット」に聞こえます）",
+            "talk of the town ➔ トーカヴ・ザ・タウン（talkのkとofが連結、さらにofとtheが一体化）",
+            "stumble upon ➔ スタンブルダ・ポン（stumbledのdとuponが連結）",
+            "hands on one ➔ ハンザ・ノン・ワン（handsのds[z]とon、onのnとoneが連続して結合します）",
+            "right here in ➔ ライト・ヒアリィン（hereのrとinが連結して「ヒアリン」のようになります）",
+            "insights about ➔ インサイツァ・バウト（insightsのtsとaboutがリンキングして「インサイツァバウト」に聞こえます）",
+            "treat shop patrons ➔ トリートゥ・ショップ・ペイトロンズ（treatのtが直後のs音で消えがちになります）",
+            "new arrivals ➔ ニュー・アライヴァルズ（newの最後からarrivalsへ一息に流れます）",
+            "Check out ➔ チェッカウト（Checkのkとoutが完全に連結して『チェッカウト』）"
+        ];
+
+        // --- 英文・日本語データ定義（Chorlton Vinyl） ---
+        const speechData = [
+            {
+                speaker: "Ad Headline",
+                time: "Ad Title",
+                en: "RECORD SHOP MANAGER NEEDED\n(2 OCTOBER)",
+                ja: "レコード・ショップ・マネージャー募集\n（10 月 2 日）"
+            },
+            {
+                speaker: "Job Ad",
+                time: "Paragraph 1",
+                en: "Chorlton Vinyl, a record shop that specializes in vintage records and has been a big part of the Manchester music scene for over four decades, is looking for someone who loves music, possesses excellent organizational skills, and has the ability to lead as our shop manager.",
+                ja: "マンチェスターの音楽シーンを 40 年以上支えてきたヴィンテージ・レコード専門店チョールトン・ヴァイナルでは、音楽を愛し、優れた組織運営スキルを持ち、ショップ・マネージャーとして先頭に立つ能力のある方を募集中です。"
+            },
+            {
+                speaker: "Job Ad",
+                time: "Paragraph 2",
+                en: "The successful candidate will oversee operations, manage inventory, and procure both new and used records. Additionally, the new manager will understand the technical aspects of vinyl production, including pressing techniques as well as the types of vinyl and how they affect sound quality. Qualifications for this role include a minimum of five years in retail management.",
+                ja: "採用された候補者は、業務を監督し、在庫を管理し、新譜と中古レコードの両方を調達します。また、新しいマネージャーになる方は、プレス技術や、レコードの種類とそれぞれの音質への影響など、レコード製造の技術的な側面も理解している必要があります。この職務に必要な資格には、最低 5 年の小売店の運営経験が含まれます。"
+            },
+            {
+                speaker: "Job Ad",
+                time: "Paragraph 3",
+                en: "If you are ready to contribute to the legacy of Chorlton Vinyl, we invite you to apply now and join us in keeping the spirit of vinyl alive. Send your résumé and cover letter to mail@chorltonvinyl.com.",
+                ja: "チョールトン・ヴァイナルのレガシーに貢献する準備ができている方は、今すぐ応募して、私たちと一緒にレコードの魂を守りましょう。履歴書とカバーレターを mail@chorltonvinyl.com までお送りください。"
+            },
+            {
+                speaker: "Article Title",
+                time: "News Title",
+                en: "Chorlton Vinyl Strikes Gold",
+                ja: "チョールトン・ヴァイナルがお宝を発見"
+            },
+            {
+                speaker: "News Article",
+                time: "Report P1-1",
+                en: "Manchester (16 October) — In a stroke of luck, Chorlton Vinyl has uncovered a rare rock and roll album, Bluest Clouds by Manchester native and singer-songwriter Sue Morningstar, at a flea market.",
+                ja: "マンチェスター（10 月 16 日）──チョールトン・ヴァイナルは、マンチェスター出身でシンガーソングライターのスー・モーニングスターによる希少なロックンロール・アルバム『ブルーエスト・クラウズ』を、幸運にもフリーマーケットで発見した。"
+            },
+            {
+                speaker: "News Article",
+                time: "Report P1-2",
+                en: "This extraordinary find, valued at over £1,500, is now the talk of the town among Manchester’s avid album collectors.",
+                ja: "1500 ポンド以上の値がついたこの驚くべき発見は、マンチェスターの熱心なアルバム・コレクターの間で今話題になっている。"
+            },
+            {
+                speaker: "News Article",
+                time: "Report P1-3",
+                en: "Craig Irving, the shop’s new manager who stumbled upon this music history treasure during a visit to London last week, commented, “Very few original copies of this debut album by such a great talent were pressed, and it’s hard to get your hands on one.",
+                ja: "同店の新マネージャー、クレイグ・アーヴィングは、先週ロンドンを訪れた際、この音楽史に残る宝物を偶然発見し、こうコメントした。「この偉大な才能の持ち主のデビュー・アルバムのオリジナル盤はほとんどプレスされておらず、手に入れるのは困難です。"
+            },
+            {
+                speaker: "News Article",
+                time: "Report P1-4",
+                en: "Recorded at a studio right here in Manchester, it still influences musicians today with its poignant lyrics and soulful acoustic guitar melodies.”",
+                ja: "ここマンチェスターのスタジオで録音されたこのアルバムは、心に刺さる歌詞とソウルフルなアコースティック・ギターのメロディーで、今日でもミュージシャンに影響を与えています」。"
+            },
+            {
+                speaker: "News Article",
+                time: "Report P1-5",
+                en: "Craig also revealed that Sue Morningstar will soon visit the shop to share insights about the recording process, discuss her influences, and treat shop patrons to an intimate acoustic guitar performance.",
+                ja: "クレイグ氏はまた、スー・モーニングスターが近々店を訪れ、レコーディングのプロセスについての深い話を共有し、彼女に影響を与えたものについて語り、親密なアコースティック・ギターの演奏で店の客をもてなす予定であることも明らかにした。"
+            },
+            {
+                speaker: "Shop Info",
+                time: "Footer Info",
+                en: "Chorlton Vinyl\n\n3464 Wilbraham Road, Chorlton, Manchester M21 9AS, UK | +44 161 9496 0934",
+                ja: "チョールトン・ヴァイナル\n\nウィルブラハム通り 3464 番地　チョールトン　マンチェスター M21 9AS 英国 | +44 161 9496 0934"
+            },
+            {
+                speaker: "Promo Banner",
+                time: "Header",
+                en: "New Arrivals Every Week and a November Discount",
+                ja: "毎週入荷する新商品と 11 月の割引"
+            },
+            {
+                speaker: "Promo Content",
+                time: "Details",
+                en: "What’s New\nExplore the latest additions to our extensive collection of records, featuring rare finds and timeless classics, including Celestial Mirage, Bluest Clouds, The Whooshers, and Exile on Mars.",
+                ja: "新着情報\n『セレスティアル・ミラージュ』『ブルーエスト・クラウズ』『ザ・フーシャーズ』『エグザイル・オン・マーズ』など、レア盤から不朽の名盤まで、当店の豊富なレコード・コレクションに加わった新譜をご覧ください。"
+            },
+            {
+                speaker: "Promo Discount",
+                time: "Campaign",
+                en: "15% OFF\nPresent this postcard in-shop to get 15% off on your next vinyl purchase.",
+                ja: "15 %オフ\n店頭でこのハガキをご提示いただくと、次回のレコードの購入が 15 %オフになります。"
+            },
+            {
+                speaker: "Promo Terms",
+                time: "Rules",
+                en: "Terms and Conditions\nDiscount valid until November 30.\nOne discount per customer.\nDiscount does not apply to rare albums priced at over £1,000.",
+                ja: "ご利用規約\n割引は 11 月 30 日まで有効。\nお一人様一回限り。\n1000 ポンド以上の希少盤には割引は適用されません。"
+            },
+            {
+                speaker: "Promo Footer",
+                time: "Call to Action",
+                en: "Check out our upcoming events and special guests at Chorlton Vinyl: www.chorltonvinyl.com. Visit Chorlton Vinyl today and let the music play!",
+                ja: "チョールトン・ヴァイナルの今後のイベントやスペシャルゲストをチェック：www.chorltonvinyl.com。今すぐチョールトン・ヴァイナルを訪れ、音楽に浸りましょう!"
+            }
+        ];
+
+        // --- 状態管理変数 ---
+        const synth = window.speechSynthesis;
+        let currentUtterance = null;
+        let activeIndex = null;
+        let isLoopingAll = false;
+        let speechVoices = [];
+        
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let audioUrl = null;
+        let isRecording = false;
+
+        // --- Firebase/Firestore関連変数 ---
+        let db = null;
+        let auth = null;
+        let user = null;
+        let appId = 'default-app-id';
+
+        // --- 動的なファイル名およびストレージキー管理 ---
+        let currentFilename = "kindoku_Chorlton.html";
+        let storageKey = "kindoku_notes_Chorlton";
+        let cloudDocId = "kindoku_Chorlton";
+
+        // --- DOM要素取得 ---
+        const scriptContainer = document.getElementById('scriptContainer');
+        const btnPlayAll = document.getElementById('btnPlayAll');
+        const btnStop = document.getElementById('btnStop');
+        const voiceSelect = document.getElementById('voiceSelect');
+        const speedRange = document.getElementById('speedRange');
+        const speedValue = document.getElementById('speedValue');
+        const modeToggle = document.getElementById('modeToggle');
+        
+        const btnRecord = document.getElementById('btnRecord');
+        const btnPlayRec = document.getElementById('btnPlayRec');
+        const recIcon = document.getElementById('recIcon');
+        const recText = document.getElementById('recText');
+        const recStatus = document.getElementById('recStatus');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+
+        // --- メモ機能用DOM要素取得 ---
+        const myNotes = document.getElementById('myNotes');
+        const btnSaveNotes = document.getElementById('btnSaveNotes');
+        const btnCopyNotes = document.getElementById('btnCopyNotes');
+        const btnClearNotes = document.getElementById('btnClearNotes');
+        const copyAlert = document.getElementById('copyAlert');
+        const saveStatus = document.getElementById('saveStatus');
+        const staticNotesList = document.getElementById('staticNotesList');
+
+        // --- ファイル名、ストレージキー、およびEXERCISEラベルを自動検出・設定する関数 ---
+        function setupFilenameAndKeys() {
+            try {
+                const path = window.location.pathname;
+                const filename = path.substring(path.lastIndexOf('/') + 1);
+                
+                if (filename && filename.includes('.html')) {
+                    currentFilename = filename;
+                    document.getElementById('filenameDisplay').textContent = filename;
+                    
+                    const nameWithoutExt = filename.replace('.html', '');
+                    storageKey = `kindoku_notes_${nameWithoutExt}`;
+                    cloudDocId = nameWithoutExt;
+
+                    const exMatch = filename.match(/Ex_?(\d+)/i) || filename.match(/(\d+)/);
+                    if (exMatch && exMatch[1]) {
+                        const numStr = exMatch[1];
+                        const formattedNum = numStr.length === 1 ? `00${numStr}` : (numStr.length === 2 ? `0${numStr}` : numStr);
+                        
+                        document.getElementById('exerciseDisplay').textContent = `Exercise ${formattedNum}`;
+                    }
+                }
+            } catch (e) {
+                console.error("ファイル名自動同期処理エラー:", e);
+            }
+        }
+
+        // --- 固定メモのリストを画面に組み立てる関数 ---
+        function buildStaticNotesUI() {
+            staticNotesList.innerHTML = '';
+            if (staticNotes.length === 0) {
+                staticNotesList.innerHTML = `<li class="text-slate-400 italic">（固定発音メモは未設定です）</li>`;
+                return;
+            }
+            staticNotes.forEach(note => {
+                const li = document.createElement('li');
+                li.textContent = note;
+                staticNotesList.appendChild(li);
+            });
+        }
+
+        // --- 音声リストの取得と生成 ---
+        function loadVoices() {
+            if (!synth) return;
+            const allVoices = synth.getVoices();
+            speechVoices = allVoices.filter(voice => voice.lang.startsWith('en'));
+            
+            if (speechVoices.length === 0) {
+                speechVoices = allVoices;
+            }
+
+            voiceSelect.innerHTML = '';
+            if (speechVoices.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = "";
+                opt.textContent = "標準ブラウザ音声";
+                voiceSelect.appendChild(opt);
+                return;
+            }
+
+            speechVoices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                
+                let genderTag = "";
+                const nameLower = voice.name.toLowerCase();
+                if (nameLower.includes('david') || nameLower.includes('george') || nameLower.includes('male') || nameLower.includes('ravi') || nameLower.includes('mark') || nameLower.includes('daniel')) {
+                    genderTag = "[男声] ";
+                } else if (nameLower.includes('zira') || nameLower.includes('female') || nameLower.includes('hazel') || nameLower.includes('susan') || nameLower.includes('haruka') || nameLower.includes('lisa') || nameLower.includes('samantha')) {
+                    genderTag = "[女声] ";
+                } else {
+                    genderTag = "[音声] ";
+                }
+
+                const isDefault = voice.default ? " (推奨)" : "";
+                option.textContent = `${genderTag}${voice.name} (${voice.lang})${isDefault}`;
+                voiceSelect.appendChild(option);
+            });
+
+            // 推奨音声の自動選択
+            const preferredIndex = speechVoices.findIndex(v => 
+                v.name.includes('Google US English') || 
+                v.name.includes('Zira') || 
+                v.name.includes('David') ||
+                v.name.includes('Samantha')
+            );
+            if (preferredIndex !== -1) {
+                voiceSelect.value = preferredIndex;
+            }
+        }
+
+        if (typeof synth !== 'undefined' && synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = loadVoices;
+        }
+
+        // --- 画面初期ビルド ---
+        function buildScriptUI() {
+            scriptContainer.innerHTML = '';
+            speechData.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.id = `row-${index}`;
+                row.className = "p-4 sm:p-5 transition-all duration-200 cursor-pointer hover:bg-amber-50/20 flex flex-col gap-1.5";
+                row.onclick = () => playSingleRow(index);
+
+                // 各行の話者や機能に応じて色分けバッジを配置
+                let partBadge = "";
+                if (item.speaker === "Ad Headline" || item.speaker === "Job Ad") {
+                    partBadge = `<span class="bg-amber-100 text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded-md">Job Ad</span>`;
+                } else if (item.speaker === "Article Title" || item.speaker === "News Article") {
+                    partBadge = `<span class="bg-indigo-100 text-indigo-900 text-[10px] font-bold px-2 py-0.5 rounded-md">News Release</span>`;
+                } else if (item.speaker.startsWith("Promo") || item.speaker === "Shop Info") {
+                    partBadge = `<span class="bg-emerald-100 text-emerald-900 text-[10px] font-bold px-2 py-0.5 rounded-md">Promo Campaign</span>`;
+                } else {
+                    partBadge = `<span class="bg-slate-100 text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-md">${item.speaker}</span>`;
+                }
+
+                row.innerHTML = `
+                    <div class="flex items-center gap-2 select-none">
+                        <span class="text-xs font-bold text-slate-400">Statement ${index + 1}</span>
+                        ${partBadge}
+                        <span class="text-[10px] text-slate-400 font-mono">${item.time}</span>
+                    </div>
+                    <!-- 英文テキスト: font-sans (Inter) で完全に可読性の高いサンセリフを表示 -->
+                    <div class="text-base sm:text-lg font-semibold text-slate-900 leading-relaxed tracking-wide mt-1 whitespace-pre-line font-sans" id="en-${index}">
+                        ${item.en}
+                    </div>
+                    <!-- 日本語和訳テキスト -->
+                    <div class="text-xs sm:text-sm text-slate-500 font-medium mt-0.5 whitespace-pre-line leading-relaxed">
+                        ${item.ja}
+                    </div>
+                `;
+                scriptContainer.appendChild(row);
+            });
+            loadVoices();
+        }
+
+        // --- 音声合成（TTS）処理 ---
+        function stopAudio() {
+            isLoopingAll = false;
+            synth.cancel();
+            if (currentUtterance) currentUtterance = null;
+            clearVisualHighlights();
+            btnPlayAll.innerHTML = "<span>[再生] 全文再生</span>";
+        }
+
+        function clearVisualHighlights() {
+            speechData.forEach((_, i) => {
+                const r = document.getElementById(`row-${i}`);
+                const e = document.getElementById(`en-${i}`);
+                if (r) r.classList.remove('playing-row');
+                if (e) e.classList.remove('highlight');
+            });
+            activeIndex = null;
+        }
+
+        function highlightRow(index) {
+            clearVisualHighlights();
+            activeIndex = index;
+            const row = document.getElementById(`row-${index}`);
+            const enText = document.getElementById(`en-${index}`);
+            if (row) row.classList.add('playing-row');
+            if (enText) enText.classList.add('highlight');
+            
+            row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function playSingleRow(index) {
+            stopAudio();
+            speakSequence(index, false);
+        }
+
+        // 全文再生
+        function playAllFromStart() {
+            stopAudio();
+            isLoopingAll = true;
+            btnPlayAll.innerHTML = "<span>[一時停止中...]</span>";
+            speakSequence(0, true);
+        }
+
+        function speakSequence(index, continueNext = false) {
+            if (index >= speechData.length || (!isLoopingAll && continueNext)) {
+                stopAudio();
+                return;
+            }
+
+            highlightRow(index);
+            synth.cancel();
+
+            let speakEn = speechData[index].en;
+            currentUtterance = new SpeechSynthesisUtterance(speakEn);
+            
+            if (speechVoices.length > 0 && voiceSelect.value !== "") {
+                const selectedVoice = speechVoices[parseInt(voiceSelect.value)];
+                if (selectedVoice) {
+                    currentUtterance.voice = selectedVoice;
+                    currentUtterance.lang = selectedVoice.lang;
+                }
+            } else {
+                currentUtterance.lang = 'en-US';
+            }
+
+            currentUtterance.rate = parseFloat(speedRange.value);
+
+            currentUtterance.onend = () => {
+                if (continueNext && isLoopingAll) {
+                    const isStepMode = modeToggle.checked;
+                    if (isStepMode) {
+                        btnPlayAll.innerHTML = "<span>[再生] 全文再生</span>";
+                        isLoopingAll = false; 
+                    } else {
+                        speakSequence(index + 1, true);
+                    }
+                } else if (!continueNext) {
+                    clearVisualHighlights();
+                }
+            };
+
+            currentUtterance.onerror = () => {
+                clearVisualHighlights();
+            };
+
+            synth.speak(currentUtterance);
+        }
+
+        // --- マイク録音処理 ---
+        async function toggleRecording() {
+            if (!isRecording) {
+                audioChunks = [];
+                try {
+                    synth.cancel(); 
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    
+                    mediaRecorder.ondataavailable = (e) => {
+                        if (e.data.size > 0) audioChunks.push(e.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                        audioUrl = URL.createObjectURL(audioBlob);
+                        btnPlayRec.disabled = false;
+                        btnPlayRec.classList.remove('bg-slate-100', 'text-slate-400');
+                        btnPlayRec.classList.add('bg-amber-100', 'text-amber-800', 'hover:bg-amber-200');
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    
+                    recIcon.textContent = "■";
+                    recText.textContent = "録音を停止";
+                    btnRecord.classList.replace('bg-red-600', 'bg-slate-800');
+                    btnRecord.classList.replace('hover:bg-red-750', 'hover:bg-slate-900');
+                    
+                    statusDot.classList.replace('bg-slate-300', 'bg-red-600');
+                    statusDot.classList.add('animate-ping');
+                    statusText.textContent = "マイク録音中...";
+                    statusText.classList.add('text-red-600');
+                } catch (err) {
+                    console.error("マイク接続エラー:", err);
+                    statusText.textContent = "マイクアクセスエラー";
+                    statusText.classList.add('text-red-600');
+                }
+            } else {
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                }
+                isRecording = false;
+                
+                recIcon.textContent = "●";
+                recText.textContent = "録音スタート";
+                btnRecord.classList.replace('bg-slate-800', 'bg-red-600');
+                btnRecord.classList.replace('hover:bg-slate-900', 'hover:bg-red-750');
+                
+                statusDot.classList.remove('animate-ping');
+                statusDot.classList.replace('bg-red-600', 'bg-emerald-500');
+                statusText.textContent = "録音完了（再生可能）";
+                statusText.classList.replace('text-red-600', 'text-emerald-600');
+            }
+        }
+
+        function playRecordedAudio() {
+            if (audioUrl) {
+                synth.cancel();
+                const audio = new Audio(audioUrl);
+                audio.play();
+            }
+        }
+
+        // --- クラウド＆ローカル保存処理 (手動セーブ) ---
+        function isLocalStorageAvailable() {
+            try {
+                const testKey = '__storage_test__';
+                localStorage.setItem(testKey, testKey);
+                localStorage.removeItem(testKey);
+                return true;
+            } catch (e) {
+                return false; 
+            }
+        }
+
+        const initFirebaseAndAuth = async () => {
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                try {
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    const app = initializeApp(firebaseConfig);
+                    auth = getAuth(app);
+                    db = getFirestore(app);
+                    appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+
+                    onAuthStateChanged(auth, async (u) => {
+                        user = u;
+                        await loadNotes(); 
+                    });
+                } catch (err) {
+                    console.error("クラウド接続エラー。ローカル保存へ移行します。:", err);
+                    await loadNotes();
+                }
+            } else {
+                await loadNotes();
+            }
+        };
+
+        async function loadNotes() {
+            let loadedText = "";
+            if (isLocalStorageAvailable()) {
+                try {
+                    const localData = localStorage.getItem(storageKey);
+                    if (localData !== null) {
+                        loadedText = localData;
+                        myNotes.value = localData;
+                    }
+                } catch (e) {
+                    console.error("ローカルデータ読み込み例外:", e);
+                }
+            }
+
+            if (db && user) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'notes', cloudDocId);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        const cloudData = docSnap.data().text || '';
+                        if (!loadedText || loadedText !== cloudData) {
+                            myNotes.value = cloudData;
+                            if (isLocalStorageAvailable()) {
+                                localStorage.setItem(storageKey, cloudData);
+                            }
+                        }
+                    }
+                } catch (err) {
+                    console.error("クラウドメモ読み込みエラー:", err);
+                }
+            }
+        }
+
+        async function saveNotesAction() {
+            const text = myNotes.value;
+            saveStatus.textContent = "保存中...";
+            saveStatus.className = "text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded transition-all duration-200 opacity-100 animate-pulse";
+
+            let savedCloud = false;
+            let savedLocal = false;
+
+            if (db && user) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'notes', cloudDocId);
+                    await setDoc(docRef, { text: text, updatedAt: new Date().toISOString() }, { merge: true });
+                    savedCloud = true;
+                } catch (err) {
+                    console.error("クラウド保存失敗:", err);
+                }
+            }
+
+            if (isLocalStorageAvailable()) {
+                try {
+                    localStorage.setItem(storageKey, text);
+                    savedLocal = true;
+                } catch (err) {
+                    console.error("ローカル保存失敗:", err);
+                }
+            }
+
+            if (savedCloud && savedLocal) {
+                showSaveStatus("保存完了(クラウド＆ローカル)");
+            } else if (savedCloud) {
+                showSaveStatus("保存完了(クラウド同期)");
+            } else if (savedLocal) {
+                showSaveStatus("保存完了(ブラウザ保存)");
+            } else {
+                showSaveStatus("保存不可");
+            }
+        }
+
+        let saveTimeout = null;
+        function handleNoteInput() {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                const text = myNotes.value;
+                if (isLocalStorageAvailable()) {
+                    try {
+                        localStorage.setItem(storageKey, text);
+                    } catch (e) {
+                        console.error("自動一時セーブ失敗:", e);
+                    }
+                }
+            }, 1000); 
+        }
+
+        function showSaveStatus(text) {
+            saveStatus.textContent = text;
+            saveStatus.className = "text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded transition-all duration-300 opacity-100";
+            setTimeout(() => {
+                saveStatus.classList.replace('opacity-100', 'opacity-0');
+            }, 2500);
+        }
+
+        btnCopyNotes.onclick = () => {
+            const textToCopy = myNotes.value;
+            if (!textToCopy.trim()) return;
+
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = textToCopy;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    copyAlert.classList.remove('hidden');
+                    setTimeout(() => {
+                        copyAlert.classList.add('hidden');
+                    }, 2000);
+                }
+            } catch (err) {
+                console.error('コピーに失敗しました:', err);
+            } finally {
+                document.body.removeChild(tempTextArea);
+            }
+        };
+
+        btnClearNotes.onclick = () => {
+            myNotes.value = '';
+            handleNoteInput(); 
+        };
+
+        // --- イベントリスナー登録 ---
+        btnPlayAll.onclick = () => {
+            if (isLoopingAll) stopAudio();
+            else playAllFromStart();
+        };
+        btnStop.onclick = stopAudio;
+        btnRecord.onclick = toggleRecording;
+        btnPlayRec.onclick = playRecordedAudio;
+        
+        btnSaveNotes.onclick = saveNotesAction; 
+        myNotes.oninput = handleNoteInput; 
+        
+        voiceSelect.onchange = () => {
+            if (activeIndex !== null && synth.speaking) {
+                const savedIndex = activeIndex;
+                const savedLoop = isLoopingAll;
+                stopAudio();
+                isLoopingAll = savedLoop;
+                if (savedLoop) btnPlayAll.innerHTML = "<span>[一時停止中...]</span>";
+                speakSequence(savedIndex, savedLoop);
+            }
+        };
+
+        speedRange.oninput = () => {
+            const currentSpeed = parseFloat(speedRange.value).toFixed(2);
+            speedValue.textContent = `${currentSpeed}x`;
+        };
+
+        speedRange.onchange = () => {
+            if (activeIndex !== null && synth.speaking) {
+                const savedIndex = activeIndex;
+                const savedLoop = isLoopingAll;
+                stopAudio();
+                isLoopingAll = savedLoop;
+                if (savedLoop) btnPlayAll.innerHTML = "<span>[一時停止中...]</span>";
+                speakSequence(savedIndex, savedLoop);
+            }
+        };
+
+        const init = async () => {
+            setupFilenameAndKeys(); 
+            buildScriptUI();
+            buildStaticNotesUI(); 
+            await initFirebaseAndAuth();
+        };
+
+        window.onload = init;
+    </script>
+</body>
+</html>
