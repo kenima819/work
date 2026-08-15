@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ビジネス英語音読トレーナー - Hantech Systems 編</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700&family=Plus+Jakarta+Sans:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
+        }
+        .hantech-header {
+            font-family: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
+        }
+        .highlight { 
+            background-color: #e0f2fe; 
+            border-bottom: 2px solid #0284c7; 
+        }
+        .playing-row { 
+            background-color: #f0f9ff; 
+            border-left: 4px solid #0369a1; 
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+    <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        <!-- ヘッダーエリア -->
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-5 mb-6">
+            <div>
+                <span id="exerciseDisplay" class="text-xs font-bold tracking-widest text-indigo-800 bg-indigo-100 px-3 py-1 rounded-md uppercase">Exercise 053</span>
+                <h1 class="text-3xl font-extrabold text-slate-900 mt-2 hantech-header flex items-center gap-2">
+                    Hantech Systems <span class="italic text-indigo-600 font-semibold text-2xl">音読トレーニング</span>
+                </h1>
+            </div>
+            <div class="mt-3 sm:mt-0 text-sm text-slate-500 font-medium flex flex-col items-end gap-1">
+                <div>対象ファイル名: <code id="filenameDisplay" class="bg-slate-100 px-2 py-0.5 rounded text-indigo-900 font-mono text-xs">kindoku_Hantech.html</code></div>
+                <div class="text-[11px] text-indigo-600/90 tracking-wide uppercase font-bold">Modern Tech Blue & Indigo Theme</div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- 左・中央エリア：音読メインコントロール -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- コントロールパネル -->
+                <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200 space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <!-- 再生・停止 -->
+                        <div class="flex items-center gap-2">
+                            <button id="btnPlayAll" class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-800 hover:from-indigo-700 hover:to-indigo-900 text-white font-medium rounded-xl shadow-md shadow-indigo-900/10 transition flex items-center gap-2 active:scale-95">
+                                <span class="w-2.5 h-2.5 bg-white rounded-full inline-block animate-pulse"></span>
+                                <span>[再生] 全文再生</span>
+                            </button>
+                            <button id="btnStop" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition active:scale-95">
+                                [停止]
+                            </button>
+                        </div>
+
+                        <!-- 音声タイプ選択 -->
+                        <div class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200/60 min-w-[180px]">
+                            <label for="voiceSelect" class="text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Voice:</label>
+                            <select id="voiceSelect" class="bg-transparent font-semibold text-slate-700 focus:outline-none text-xs cursor-pointer w-full max-w-[200px]">
+                                <option value="">(音声読み込み中...)</option>
+                            </select>
+                        </div>
+
+                        <!-- モード切替 -->
+                        <div class="flex items-center gap-2">
+                            <label class="relative inline-flex items-center cursor-pointer select-none">
+                                <input type="checkbox" id="modeToggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                <span class="ml-2 text-sm font-medium text-slate-700">1文ごとに自動停止</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- スピード調整スライダー -->
+                    <div class="bg-indigo-50/40 p-4 rounded-xl border border-indigo-100/60 flex flex-col sm:flex-row items-center gap-4">
+                        <div class="w-full flex items-center justify-between sm:w-auto gap-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Speed:</span>
+                            <span id="speedValue" class="text-sm font-mono font-bold text-indigo-800 bg-indigo-100/60 px-2.5 py-0.5 rounded">1.00x</span>
+                        </div>
+                        <input type="range" id="speedRange" min="0.5" max="2.0" step="0.05" value="1.0" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 focus:outline-none">
+                    </div>
+
+                    <!-- 録音・フィードバックパネル -->
+                    <div class="border-t border-slate-100 pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <button id="btnRecord" class="px-5 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-md transition flex items-center justify-center gap-2 min-w-[140px] active:scale-95">
+                                <span id="recIcon">●</span> <span id="recText">録音スタート</span>
+                            </button>
+                            <button id="btnPlayRec" disabled class="px-4 py-3 bg-slate-100 text-slate-400 font-medium rounded-xl transition flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95">
+                                <span>[声再生] 自分の声を聴く</span>
+                            </button>
+                        </div>
+                        <div id="recStatus" class="text-xs font-semibold text-slate-400 flex items-center gap-1.5 px-3 py-2 bg-slate-50 rounded-lg border border-slate-200/50">
+                            <span class="w-2 h-2 rounded-full bg-slate-300 block" id="statusDot"></span>
+                            <span id="statusText">マイク待機中</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 英文・日本文本体エリア -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-4 bg-slate-50 border-b border-slate-200/80 flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-700 tracking-wider uppercase">Training Workspace</span>
+                        <span class="text-xs text-slate-500 hidden sm:inline">文をクリックすると、その文だけをお手本再生できます</span>
+                    </div>
+                    
+                    <div id="scriptContainer" class="divide-y divide-slate-100">
+                        <!-- JavaScriptで動的生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右エリア：学習サポートサイドバー -->
+            <div class="space-y-6 max-h-[85vh] overflow-y-auto pr-1">
+                
+                <!-- 語注エリア -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="font-bold text-slate-900 text-base border-b border-slate-100 pb-2 flex items-center justify-between">
+                        <span>[徹底解説・重要語注]</span>
+                        <span class="text-[11px] text-indigo-800 font-bold bg-indigo-50 px-2 py-0.5 rounded">Glossary</span>
+                    </h3>
+                    
+                    <!-- 【1 通目のメール】語注 -->
+                    <div>
+                        <h4 class="text-xs font-bold text-indigo-900 bg-indigo-50 px-2 py-1 rounded-md uppercase tracking-wider mb-2">[1通目のメール（サポート依頼）]</h4>
+                        <div class="space-y-1.5 text-xs leading-relaxed text-slate-600 max-h-[180px] overflow-y-auto pr-1 border-b border-slate-100 pb-3">
+                            <p><strong>assistance</strong> [名] 助け、援助</p>
+                            <p><strong>fashion boutique</strong> [名] アパレルショップ、洋品店</p>
+                            <p><strong>grand opening</strong> [名] 開店、開業</p>
+                            <p><strong>take place</strong> [連] 行われる</p>
+                            <p><strong>although</strong> [接] 〜だが</p>
+                            <p><strong>carefully</strong> [副] 慎重に</p>
+                            <p><strong>follow</strong> [動] 従う</p>
+                            <p><strong>instruction</strong> [名] 指示書、説明書</p>
+                            <p><strong>provide</strong> [動] 提供する</p>
+                            <p><strong>come across</strong> [連] 〜に出くわす</p>
+                            <p><strong>whenever</strong> [接] 〜するときはいつでも</p>
+                            <p><strong>attempt to do</strong> [連] 〜しようとする</p>
+                            <p><strong>initiate</strong> [動] 始める</p>
+                            <p><strong>checkout</strong> [名] 精算</p>
+                            <p><strong>prevent X from doing</strong> [連] X が〜するのを妨げる</p>
+                            <p><strong>complete</strong> [動] 完了する</p>
+                            <p><strong>transaction</strong> [名] 取引</p>
+                            <p><strong>given that</strong> [連] 〜することを考慮すると</p>
+                            <p><strong>just around the corner</strong> [連] もうすぐ</p>
+                            <p><strong>expect</strong> [動] 予期する、予想する</p>
+                            <p><strong>turnout</strong> [名] 来店者数、人出</p>
+                            <p><strong>immediate</strong> [形] すぐの、即座の</p>
+                            <p><strong>resolve</strong> [動] 解決する</p>
+                            <p><strong>matter</strong> [名] 問題、件</p>
+                        </div>
+                    </div>
+
+                    <!-- 【2 通目のメール】語注 -->
+                    <div class="pt-1">
+                        <h4 class="text-xs font-bold text-indigo-900 bg-indigo-50 px-2 py-1 rounded-md uppercase tracking-wider mb-2">[2通目のメール（返信・提案）]</h4>
+                        <div class="space-y-1.5 text-xs leading-relaxed text-slate-600 max-h-[180px] overflow-y-auto pr-1 border-b border-slate-100 pb-3">
+                            <p><strong>bring to one’s attention</strong> [連] 〜に注意を向けさせる</p>
+                            <p><strong>issue</strong> [名] 問題</p>
+                            <p><strong>encounter</strong> [動] 遭遇する</p>
+                            <p><strong>recently</strong> [副] 最近</p>
+                            <p><strong>improve</strong> [動] 改善する</p>
+                            <p><strong>functionality</strong> [名] 機能性</p>
+                            <p><strong>fix</strong> [動] 直す、修正する</p>
+                            <p><strong>cause</strong> [動] 引き起こす</p>
+                            <p><strong>urgency</strong> [名] 緊急性</p>
+                            <p><strong>solution</strong> [名] 解決策</p>
+                            <p><strong>be in touch with</strong> [連] 〜と連絡を取る</p>
+                            <p><strong>shortly</strong> [副] もうすぐ</p>
+                            <p><strong>in addition</strong> [連] 加えて</p>
+                            <p><strong>opportunity</strong> [名] 機会</p>
+                            <p><strong>mention</strong> [動] 述べる</p>
+                            <p><strong>implement</strong> [動] 実行する、導入する</p>
+                            <p><strong>strategy</strong> [名] 戦略</p>
+                            <p><strong>require</strong> [動] 必要とする</p>
+                            <p><strong>encourage</strong> [動] 勧める、推奨する</p>
+                            <p><strong>consult</strong> [動] 相談する</p>
+                            <p><strong>expert</strong> [名] 専門家</p>
+                            <p><strong>retail</strong> [名] 小売り</p>
+                            <p><strong>latest</strong> [形] 最新の</p>
+                            <p><strong>marketplace</strong> [名] （取引が行われる）市場</p>
+                            <p><strong>interest</strong> [動] 興味を引く</p>
+                        </div>
+                    </div>
+
+                    <!-- 【情報＆設問】語注 -->
+                    <div class="pt-1">
+                        <h4 class="text-xs font-bold text-indigo-900 bg-indigo-50 px-2 py-1 rounded-md uppercase tracking-wider mb-2">[チーム情報＆設問・選択肢]</h4>
+                        <div class="space-y-1.5 text-xs leading-relaxed text-slate-600 max-h-[180px] overflow-y-auto pr-1">
+                            <p><strong>pride oneself on doing</strong> [連] 〜することを誇りにする</p>
+                            <p><strong>deliver</strong> [動] 届ける、提供する</p>
+                            <p><strong>dedicated</strong> [形] 献身的な</p>
+                            <p><strong>dependable</strong> [形] 信頼できる</p>
+                            <p><strong>be at your service</strong> [連] 何でもお手伝いします</p>
+                            <p><strong>develop</strong> [動] 伸ばす、発展させる</p>
+                            <p><strong>presence</strong> [名] 存在感</p>
+                            <p><strong>manage</strong> [動] 管理する</p>
+                            <p><strong>safeguard</strong> [動] 保護する</p>
+                            <p><strong>ensure</strong> [動] 保証する</p>
+                            <p><strong>protect</strong> [動] 保護する</p>
+                            <p><strong>when it comes to</strong> [連] 〜に関していえば</p>
+                            <p><strong>aspect</strong> [名] 面</p>
+                            <p><strong>sector</strong> [名] 分野</p>
+                            <p><strong>specialize</strong> [動] 専門とする</p>
+                            <p><strong>expand</strong> [動] 広げる</p>
+                            <p><strong>expertise</strong> [名] 専門知識</p>
+                            <p><strong>lie in</strong> [連] 〜にある</p>
+                            <p><strong>advertising</strong> [名] 宣伝</p>
+                            <p><strong>optimization</strong> [名] 最適化</p>
+                            <p><strong>trust</strong> [動] 信用する</p>
+                            <p><strong>elevate</strong> [動] 高める</p>
+                            <p><strong>drive</strong> [動] 推進する</p>
+                            <p><strong>tangible</strong> [形] 実感できる、現実的な</p>
+                            <p><strong>face</strong> [動] 直面する</p>
+                            <p><strong>troubleshooter</strong> [名] トラブルシューター、問題解決者</p>
+                            <p><strong>solve</strong> [動] 解決する</p>
+                            <p><strong>efficiently</strong> [副] 効率的に</p>
+                            <p><strong>revise</strong> [動] 修正する</p>
+                            <p><strong>specification</strong> [名] 仕様（書）</p>
+                            <p><strong>issue</strong> [動] 出す、発行する</p>
+                            <p><strong>clothing</strong> [名] 衣料品</p>
+                            <p><strong>launch</strong> [動] 発売する</p>
+                            <p><strong>discontinue</strong> [動] 生産中止にする</p>
+                            <p><strong>compatible</strong> [形] 互換性がある</p>
+                            <p><strong>frequently</strong> [副] 頻繁に</p>
+                            <p><strong>area of expertise</strong> [連] 専門分野</p>
+                            <p><strong>board member</strong> [名] 取締役</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- マイコメント / 学習メモカード -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                        <h3 class="font-bold text-slate-900 text-base">
+                            [マイコメント / 学習メモ]
+                        </h3>
+                        <span id="saveStatus" class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded transition-all duration-300 opacity-0">保存完了</span>
+                    </div>
+                    
+                    <!-- 発音リンキング情報エリア -->
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-bold text-indigo-800 uppercase tracking-wider">[重要リンキング・発音解説]</h4>
+                        <ul id="staticNotesList" class="list-disc list-outside pl-4 text-xs text-slate-700 space-y-1.5 leading-relaxed">
+                            <!-- JS内の「staticNotes」配列データが自動生成されます -->
+                        </ul>
+                    </div>
+
+                    <!-- その場の一時メモ記入エリア -->
+                    <div class="space-y-3 pt-3 border-t border-slate-100">
+                        <h4 class="text-xs font-bold text-indigo-800 uppercase tracking-wider">[その場の一時メモ]</h4>
+                        <p class="text-[11px] text-slate-400 leading-relaxed">
+                            ※この入力内容はブラウザに自動的・一時的にバックアップされます。
+                        </p>
+                        <textarea id="myNotes" rows="5" class="w-full p-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-slate-400" placeholder="リンキングの気づきや自身の苦手な箇所のメモ書きなどにお使いください。"></textarea>
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="btnSaveNotes" class="py-2.5 px-3 bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95">
+                                メモを保存する
+                            </button>
+                            <button id="btnCopyNotes" class="py-2.5 px-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-xs font-bold rounded-xl transition-all">
+                                メモをコピー
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1">
+                            <button id="btnClearNotes" class="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-500 text-xs font-semibold rounded-xl transition-all">
+                                クリア
+                            </button>
+                        </div>
+                        <div id="copyAlert" class="text-[11px] text-emerald-600 font-semibold text-center hidden">
+                            コピーしました！クリップボードに保存されています。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK / アプリケーション主要ロジック -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // =========================================================================
+        // 💡 【重要リンキング・発音解説メモの編集エリア】
+        // =========================================================================
+        const staticNotes = [
+            "take place ➔ テイク・プレイス（k 音が軽く飲み込まれスムーズに p 音へつながります）",
+            "come across a ➔ カマクロス・ア（come の m と across、across の s 音と a が連続連結）",
+            "attempt to ➔ アテンプトゥ（t 音が重複するため前の t 音が軽く短縮されます）",
+            "prevent X from ➔ プリヴェント...フロム（v と f の摩擦音を滑らかに移行させます）",
+            "just around the ➔ ジャスタラウンド・ザ（just の t と around の a、d と the が滑らかに合流）",
+            "bring to our attention ➔ ブリング・トゥ・アワー・アテンション（bring の g 音から to への流れを自然に）",
+            "fixed some ➔ フィクストゥ・サム（fixed の [kt] 音から s 音への繋がりを短く処理します）",
+            "in touch with ➔ イン・タッチ・ウィズ（ch 音から with の w 音へと一息で音を渡します）",
+            "take this opportunity ➔ テイク・ディス・オポチュニティ（take の k と this の th、s 音と opportunity が滑らかに連結）",
+            "prides itself on ➔ プライヅ・イツセルフ・オン（prides の s/z 音と itself、itself の f 音と on が連結）",
+            "at your service ➔ アッチャ・サービス（at の t と your の y 音が同化して『アッチャ』となります）",
+            "when it comes to ➔ ウェニッ・カムズ・トゥ（when の n と it、it の t と comes が連結）",
+            "lies in ➔ ライズ・イン（s/z 音と in が滑らかに繋がります）"
+        ];
+
+        // --- 英文・日本語データ定義（Hantech Systems & Shopix-9） ---
+        const speechData = [
+            {
+                speaker: "Email 1 Header",
+                time: "Header Info",
+                en: "To: Customer Support <support@hantechsystems.com>\nFrom: Kevin Larkin <klarkin@voguemavens.com>\nDate: June 4\nSubject: Assistance needed",
+                ja: "宛先：カスタマーサポート <support@hantechsystems.com>\n送信者：ケビン・ラーキン <klarkin@voguemavens.com>\n日付：6 月 4 日\n件名：サポート依頼"
+            },
+            {
+                speaker: "Kevin Larkin",
+                time: "Salutation",
+                en: "Hello,",
+                ja: "こんにちは"
+            },
+            {
+                speaker: "Kevin Larkin",
+                time: "Paragraph 1-1",
+                en: "I am setting up the cash registers at my fashion boutique, and its grand opening will take place next week.",
+                ja: "今、自分のアパレルショップのレジを設定中で、来週開店する予定です。"
+            },
+            {
+                speaker: "Kevin Larkin",
+                time: "Paragraph 1-2",
+                en: "Although I have been carefully following the instructions you provided with your Shopix-9 software for these machines, I’ve come across a problem.",
+                ja: "これらの機械用に頂いたソフト Shopix-9 に同梱されている説明書に慎重に従っているのですが、問題が発生しました。"
+            },
+            {
+                speaker: "Kevin Larkin",
+                time: "Paragraph 1-3",
+                en: "Whenever I attempt to initiate the checkout process, I receive an error message that prevents me from completing the test transaction.",
+                ja: "精算プロセスを開始しようとすると、毎回エラーメッセージが表示され、テストの取引を完了できません。"
+            },
+            {
+                speaker: "Kevin Larkin",
+                time: "Paragraph 1-4",
+                en: "Given that the grand opening is just around the corner and we’re expecting a large turnout, I request your immediate assistance in resolving this matter.",
+                ja: "開店が間近に迫っていて、多くのお客様のご来店を予想しているので、この問題を解決するため、早急なご対応をお願いいたします。"
+            },
+            {
+                speaker: "Kevin Larkin",
+                time: "Signoff",
+                en: "Sincerely,\n\nKevin Larkin\nVogue Mavens",
+                ja: "敬具\n\nケビン・ラーキン\nヴォーグ・メイヴンズ"
+            },
+            {
+                speaker: "Email 2 Header",
+                time: "Header Info",
+                en: "To: Kevin Larkin <klarkin@voguemavens.com>\nFrom: Customer Support <support@hantechsystems.com>\nDate: June 4\nSubject: RE: Assistance needed",
+                ja: "宛先：ケビン・ラーキン <klarkin@voguemavens.com>\n送信者：カスタマーサポート <support@hantechsystems.com>\n日付：6 月 4 日\n件名：RE: サポート依頼"
+            },
+            {
+                speaker: "Customer Support",
+                time: "Salutation",
+                en: "Dear Mr. Larkin,",
+                ja: "ラーキン様"
+            },
+            {
+                speaker: "Customer Support",
+                time: "Paragraph 1-1",
+                en: "Thank you for bringing to our attention the issue you have been encountering with our Shopix-9 software.",
+                ja: "この度は、当社 Shopix-9 ソフトウェアの不具合についてご指摘いただき、誠にありがとうございます。"
+            },
+            {
+                speaker: "Customer Support",
+                time: "Paragraph 1-2",
+                en: "Our company recently improved the functionality of that version and fixed some bugs, which may have caused the problem.",
+                ja: "当社は最近、そのバージョンの機能を改善し、いくつかのバグを修正しましたが、それが問題の原因かもしれません。"
+            },
+            {
+                speaker: "Customer Support",
+                time: "Paragraph 1-3",
+                en: "We understand the urgency of your situation, and one of our specialists will work with you to find a solution.",
+                ja: "当社はあなたの状況の緊急性を理解しており、当社のスペシャリストの一人が解決策を見つけるためにあなたと一緒に作業します。"
+            },
+            {
+                speaker: "Customer Support",
+                time: "Paragraph 1-4",
+                en: "She will be in touch with you shortly.",
+                ja: "早急に彼女から連絡させていただきます。"
+            },
+            {
+                speaker: "Customer Support",
+                time: "Paragraph 2-1",
+                en: "In addition, we want to take this opportunity to mention that we also help businesses implement strategies for online sales.",
+                ja: "また、この場をお借りして、当社がオンライン販売の戦略実行のお手伝いもしていることをお伝えしたく思います。"
+            },
+            {
+                speaker: "Customer Support",
+                time: "Paragraph 2-2",
+                en: "If you require assistance setting up an e-commerce platform, we encourage you to consult with our expert in online retail, a new member of our team who knows all the latest trends and technologies in the digital marketplace.",
+                ja: "E コマース・プラットフォームの立ち上げにサポートが必要でしたら、デジタル市場の最新トレンドとテクノロジーを知り尽くしたオンライン小売の専門家である当チームの新メンバーにご相談されることをお勧めします。"
+            },
+            {
+                speaker: "Customer Support",
+                time: "Paragraph 2-3",
+                en: "If this is something that might interest you, please let us know.",
+                ja: "ご興味を持たれましたら、是非ご連絡ください。"
+            },
+            {
+                speaker: "Customer Support",
+                time: "Signoff",
+                en: "Yours sincerely,\n\nLinda Stanley\nCustomer Support\nHantech Systems",
+                ja: "敬具\n\nリンダ・スタンレー\nカスタマーサポート\nハンテック・システムズ"
+            },
+            {
+                speaker: "Team Info",
+                time: "Overview 1",
+                en: "The Hantech Systems Team",
+                ja: "ハンテック・システムズのチーム"
+            },
+            {
+                speaker: "Team Info",
+                time: "Overview 2",
+                en: "Hantech Systems prides itself on delivering world-class customer support to its customers.",
+                ja: "ハンテック・システムズは、お客様にワールドクラスのカスタマーサポートを提供することを誇りにしています。"
+            },
+            {
+                speaker: "Team Info",
+                time: "Overview 3",
+                en: "Our dedicated and dependable team is at your service, ready to help with developing your Web site and online presence or manage any of our software products.",
+                ja: "当社の献身的で信頼できるチームは、お客様のウェブサイトやオンラインでの存在感を向上させ、当社ソフトの管理をお手伝いする準備ができています。"
+            },
+            {
+                speaker: "Team Info",
+                time: "Neil Reese",
+                en: "Neil Reese — Internet Security\nWith years of experience in Internet security, Neil can help you safeguard your Web site and customer information or ensure your online platform is protected 24/7.",
+                ja: "ニール・リース──インターネットセキュリティ\nインターネットセキュリティの分野で長年の経験を持つニールは、お客様のウェブサイトと顧客情報の保護、そしてオンライン・プラットフォームの 24 時間 365 日の保護をお手伝いします。"
+            },
+            {
+                speaker: "Team Info",
+                time: "Vivian Kaplan",
+                en: "Vivian Kaplan — Online Retail\nWhen it comes to online shopping, Vivian is an expert in all aspects of this sector. She specializes in assisting businesses with their e-commerce sites and providing solutions to expand their online presence.",
+                ja: "ビビアン・カプラン──オンライン小売\nオンラインショッピングに関しては、ビビアンはこの分野のあらゆる面に精通した専門家です。企業の E コマース・サイトに関する支援や、オンラインでの存在感を拡大するソリューションの提供を専門としています。"
+            },
+            {
+                speaker: "Team Info",
+                time: "Bruce Spears",
+                en: "Bruce Spears — Web Marketing\nBruce’s expertise lies in online advertising, search engine optimization, and social media. Trust him to elevate your business with online marketing solutions that drive tangible results.",
+                ja: "ブルース・スピアーズ──ウェブマーケティング\nブルースの専門分野はオンライン広告、検索エンジン最適化、ソーシャルメディアです。具体的な成果をもたらすオンライン・マーケティング・ソリューションでお客さまのビジネスを向上させます。"
+            },
+            {
+                speaker: "Team Info",
+                time: "Julie Tucker",
+                en: "Julie Tucker — Software Support\nJulie assists businesses facing technical issues with Hantech products. With a deep understanding of all our software solutions, she is an expert troubleshooter who solves problems quickly and efficiently.",
+                ja: "ジュリー・タッカー──ソフトウェアサポート\nジュリーは、ハンテック製品の技術的な問題に直面している会社を支援します。当社のすべてのソフトウェア・ソリューションを深く理解し、迅速かつ効率的に問題を解決するトラブルシューティングの専門家です。"
+            }
+        ];
+
+        // --- 状態管理変数 ---
+        const synth = window.speechSynthesis;
+        let currentUtterance = null;
+        let activeIndex = null;
+        let isLoopingAll = false;
+        let speechVoices = [];
+        
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let audioUrl = null;
+        let isRecording = false;
+
+        // --- Firebase/Firestore関連変数 ---
+        let db = null;
+        let auth = null;
+        let user = null;
+        let appId = 'default-app-id';
+
+        // --- 動的なファイル名およびストレージキー管理 ---
+        let currentFilename = "kindoku_Hantech.html";
+        let storageKey = "kindoku_notes_Hantech";
+        let cloudDocId = "kindoku_Hantech";
+
+        // --- DOM要素取得 ---
+        const scriptContainer = document.getElementById('scriptContainer');
+        const btnPlayAll = document.getElementById('btnPlayAll');
+        const btnStop = document.getElementById('btnStop');
+        const voiceSelect = document.getElementById('voiceSelect');
+        const speedRange = document.getElementById('speedRange');
+        const speedValue = document.getElementById('speedValue');
+        const modeToggle = document.getElementById('modeToggle');
+        
+        const btnRecord = document.getElementById('btnRecord');
+        const btnPlayRec = document.getElementById('btnPlayRec');
+        const recIcon = document.getElementById('recIcon');
+        const recText = document.getElementById('recText');
+        const recStatus = document.getElementById('recStatus');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+
+        // --- メモ機能用DOM要素取得 ---
+        const myNotes = document.getElementById('myNotes');
+        const btnSaveNotes = document.getElementById('btnSaveNotes');
+        const btnCopyNotes = document.getElementById('btnCopyNotes');
+        const btnClearNotes = document.getElementById('btnClearNotes');
+        const copyAlert = document.getElementById('copyAlert');
+        const saveStatus = document.getElementById('saveStatus');
+        const staticNotesList = document.getElementById('staticNotesList');
+
+        // --- ファイル名、ストレージキー、およびEXERCISEラベルを自動検出・設定する関数 ---
+        function setupFilenameAndKeys() {
+            try {
+                const path = window.location.pathname;
+                const filename = path.substring(path.lastIndexOf('/') + 1);
+                
+                if (filename && filename.includes('.html')) {
+                    currentFilename = filename;
+                    document.getElementById('filenameDisplay').textContent = filename;
+                    
+                    const nameWithoutExt = filename.replace('.html', '');
+                    storageKey = `kindoku_notes_${nameWithoutExt}`;
+                    cloudDocId = nameWithoutExt;
+
+                    const exMatch = filename.match(/Ex_?(\d+)/i) || filename.match(/(\d+)/);
+                    if (exMatch && exMatch[1]) {
+                        const numStr = exMatch[1];
+                        const formattedNum = numStr.length === 1 ? `00${numStr}` : (numStr.length === 2 ? `0${numStr}` : numStr);
+                        
+                        document.getElementById('exerciseDisplay').textContent = `Exercise ${formattedNum}`;
+                    }
+                }
+            } catch (e) {
+                console.error("ファイル名自動同期処理エラー:", e);
+            }
+        }
+
+        // --- 固定メモのリストを画面に組み立てる関数 ---
+        function buildStaticNotesUI() {
+            staticNotesList.innerHTML = '';
+            if (staticNotes.length === 0) {
+                staticNotesList.innerHTML = `<li class="text-slate-400 italic">（固定発音メモは未設定です）</li>`;
+                return;
+            }
+            staticNotes.forEach(note => {
+                const li = document.createElement('li');
+                li.textContent = note;
+                staticNotesList.appendChild(li);
+            });
+        }
+
+        // --- 音声リストの取得と生成 ---
+        function loadVoices() {
+            if (!synth) return;
+            const allVoices = synth.getVoices();
+            speechVoices = allVoices.filter(voice => voice.lang.startsWith('en'));
+            
+            if (speechVoices.length === 0) {
+                speechVoices = allVoices;
+            }
+
+            voiceSelect.innerHTML = '';
+            if (speechVoices.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = "";
+                opt.textContent = "標準ブラウザ音声";
+                voiceSelect.appendChild(opt);
+                return;
+            }
+
+            speechVoices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                
+                let genderTag = "";
+                const nameLower = voice.name.toLowerCase();
+                if (nameLower.includes('david') || nameLower.includes('george') || nameLower.includes('male') || nameLower.includes('ravi') || nameLower.includes('mark') || nameLower.includes('daniel')) {
+                    genderTag = "[男声] ";
+                } else if (nameLower.includes('zira') || nameLower.includes('female') || nameLower.includes('hazel') || nameLower.includes('susan') || nameLower.includes('haruka') || nameLower.includes('lisa') || nameLower.includes('samantha')) {
+                    genderTag = "[女声] ";
+                } else {
+                    genderTag = "[音声] ";
+                }
+
+                const isDefault = voice.default ? " (推奨)" : "";
+                option.textContent = `${genderTag}${voice.name} (${voice.lang})${isDefault}`;
+                voiceSelect.appendChild(option);
+            });
+
+            // 推奨音声の自動選択
+            const preferredIndex = speechVoices.findIndex(v => 
+                v.name.includes('Google US English') || 
+                v.name.includes('Zira') || 
+                v.name.includes('David') ||
+                v.name.includes('Samantha')
+            );
+            if (preferredIndex !== -1) {
+                voiceSelect.value = preferredIndex;
+            }
+        }
+
+        if (typeof synth !== 'undefined' && synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = loadVoices;
+        }
+
+        // --- 画面初期ビルド ---
+        function buildScriptUI() {
+            scriptContainer.innerHTML = '';
+            speechData.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.id = `row-${index}`;
+                row.className = "p-4 sm:p-5 transition-all duration-200 cursor-pointer hover:bg-slate-50 flex flex-col gap-1.5";
+                row.onclick = () => playSingleRow(index);
+
+                // 各行の話者や機能に応じて色分けバッジを配置
+                let partBadge = "";
+                if (item.speaker === "Email 1 Header" || item.speaker === "Kevin Larkin") {
+                    partBadge = `<span class="bg-amber-100 text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded-md">Support Request</span>`;
+                } else if (item.speaker === "Email 2 Header" || item.speaker === "Customer Support") {
+                    partBadge = `<span class="bg-indigo-100 text-indigo-900 text-[10px] font-bold px-2 py-0.5 rounded-md">Support Response</span>`;
+                } else if (item.speaker === "Team Info") {
+                    partBadge = `<span class="bg-emerald-100 text-emerald-900 text-[10px] font-bold px-2 py-0.5 rounded-md">Team Profile</span>`;
+                } else {
+                    partBadge = `<span class="bg-slate-100 text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-md">${item.speaker}</span>`;
+                }
+
+                row.innerHTML = `
+                    <div class="flex items-center gap-2 select-none">
+                        <span class="text-xs font-bold text-slate-400">Statement ${index + 1}</span>
+                        ${partBadge}
+                        <span class="text-[10px] text-slate-400 font-mono">${item.time}</span>
+                    </div>
+                    <!-- 英文テキスト -->
+                    <div class="text-base sm:text-lg font-semibold text-slate-900 leading-relaxed tracking-wide mt-1 whitespace-pre-line font-sans" id="en-${index}">
+                        ${item.en}
+                    </div>
+                    <!-- 日本語和訳テキスト -->
+                    <div class="text-xs sm:text-sm text-slate-500 font-medium mt-0.5 whitespace-pre-line leading-relaxed">
+                        ${item.ja}
+                    </div>
+                `;
+                scriptContainer.appendChild(row);
+            });
+            loadVoices();
+        }
+
+        // --- 音声合成（TTS）処理 ---
+        function stopAudio() {
+            isLoopingAll = false;
+            synth.cancel();
+            if (currentUtterance) currentUtterance = null;
+            clearVisualHighlights();
+            btnPlayAll.innerHTML = "<span>[再生] 全文再生</span>";
+        }
+
+        function clearVisualHighlights() {
+            speechData.forEach((_, i) => {
+                const r = document.getElementById(`row-${i}`);
+                const e = document.getElementById(`en-${i}`);
+                if (r) r.classList.remove('playing-row');
+                if (e) e.classList.remove('highlight');
+            });
+            activeIndex = null;
+        }
+
+        function highlightRow(index) {
+            clearVisualHighlights();
+            activeIndex = index;
+            const row = document.getElementById(`row-${index}`);
+            const enText = document.getElementById(`en-${index}`);
+            if (row) row.classList.add('playing-row');
+            if (enText) enText.classList.add('highlight');
+            
+            row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function playSingleRow(index) {
+            stopAudio();
+            speakSequence(index, false);
+        }
+
+        // 全文再生
+        function playAllFromStart() {
+            stopAudio();
+            isLoopingAll = true;
+            btnPlayAll.innerHTML = "<span>[一時停止中...]</span>";
+            speakSequence(0, true);
+        }
+
+        function speakSequence(index, continueNext = false) {
+            if (index >= speechData.length || (!isLoopingAll && continueNext)) {
+                stopAudio();
+                return;
+            }
+
+            highlightRow(index);
+            synth.cancel();
+
+            let speakEn = speechData[index].en;
+            currentUtterance = new SpeechSynthesisUtterance(speakEn);
+            
+            if (speechVoices.length > 0 && voiceSelect.value !== "") {
+                const selectedVoice = speechVoices[parseInt(voiceSelect.value)];
+                if (selectedVoice) {
+                    currentUtterance.voice = selectedVoice;
+                    currentUtterance.lang = selectedVoice.lang;
+                }
+            } else {
+                currentUtterance.lang = 'en-US';
+            }
+
+            currentUtterance.rate = parseFloat(speedRange.value);
+
+            currentUtterance.onend = () => {
+                if (continueNext && isLoopingAll) {
+                    const isStepMode = modeToggle.checked;
+                    if (isStepMode) {
+                        btnPlayAll.innerHTML = "<span>[再生] 全文再生</span>";
+                        isLoopingAll = false; 
+                    } else {
+                        speakSequence(index + 1, true);
+                    }
+                } else if (!continueNext) {
+                    clearVisualHighlights();
+                }
+            };
+
+            currentUtterance.onerror = () => {
+                clearVisualHighlights();
+            };
+
+            synth.speak(currentUtterance);
+        }
+
+        // --- マイク録音処理 ---
+        async function toggleRecording() {
+            if (!isRecording) {
+                audioChunks = [];
+                try {
+                    synth.cancel(); 
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    
+                    mediaRecorder.ondataavailable = (e) => {
+                        if (e.data.size > 0) audioChunks.push(e.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                        audioUrl = URL.createObjectURL(audioBlob);
+                        btnPlayRec.disabled = false;
+                        btnPlayRec.classList.remove('bg-slate-100', 'text-slate-400');
+                        btnPlayRec.classList.add('bg-indigo-100', 'text-indigo-800', 'hover:bg-indigo-200');
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    
+                    recIcon.textContent = "■";
+                    recText.textContent = "録音を停止";
+                    btnRecord.classList.replace('bg-red-600', 'bg-slate-800');
+                    btnRecord.classList.replace('hover:bg-red-700', 'hover:bg-slate-900');
+                    
+                    statusDot.classList.replace('bg-slate-300', 'bg-red-600');
+                    statusDot.classList.add('animate-ping');
+                    statusText.textContent = "マイク録音中...";
+                    statusText.classList.add('text-red-600');
+                } catch (err) {
+                    console.error("マイク接続エラー:", err);
+                    statusText.textContent = "マイクアクセスエラー";
+                    statusText.classList.add('text-red-600');
+                }
+            } else {
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                }
+                isRecording = false;
+                
+                recIcon.textContent = "●";
+                recText.textContent = "録音スタート";
+                btnRecord.classList.replace('bg-slate-800', 'bg-red-600');
+                btnRecord.classList.replace('hover:bg-slate-900', 'hover:bg-red-700');
+                
+                statusDot.classList.remove('animate-ping');
+                statusDot.classList.replace('bg-red-600', 'bg-emerald-500');
+                statusText.textContent = "録音完了（再生可能）";
+                statusText.classList.replace('text-red-600', 'text-emerald-600');
+            }
+        }
+
+        function playRecordedAudio() {
+            if (audioUrl) {
+                synth.cancel();
+                const audio = new Audio(audioUrl);
+                audio.play();
+            }
+        }
+
+        // --- クラウド＆ローカル保存処理 (手動セーブ) ---
+        function isLocalStorageAvailable() {
+            try {
+                const testKey = '__storage_test__';
+                localStorage.setItem(testKey, testKey);
+                localStorage.removeItem(testKey);
+                return true;
+            } catch (e) {
+                return false; 
+            }
+        }
+
+        const initFirebaseAndAuth = async () => {
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                try {
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    const app = initializeApp(firebaseConfig);
+                    auth = getAuth(app);
+                    db = getFirestore(app);
+                    appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+
+                    onAuthStateChanged(auth, async (u) => {
+                        user = u;
+                        await loadNotes(); 
+                    });
+                } catch (err) {
+                    console.error("クラウド接続エラー。ローカル保存へ移行します。:", err);
+                    await loadNotes();
+                }
+            } else {
+                await loadNotes();
+            }
+        };
+
+        async function loadNotes() {
+            let loadedText = "";
+            if (isLocalStorageAvailable()) {
+                try {
+                    const localData = localStorage.getItem(storageKey);
+                    if (localData !== null) {
+                        loadedText = localData;
+                        myNotes.value = localData;
+                    }
+                } catch (e) {
+                    console.error("ローカルデータ読み込み例外:", e);
+                }
+            }
+
+            if (db && user) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'notes', cloudDocId);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        const cloudData = docSnap.data().text || '';
+                        if (!loadedText || loadedText !== cloudData) {
+                            myNotes.value = cloudData;
+                            if (isLocalStorageAvailable()) {
+                                localStorage.setItem(storageKey, cloudData);
+                            }
+                        }
+                    }
+                } catch (err) {
+                    console.error("クラウドメモ読み込みエラー:", err);
+                }
+            }
+        }
+
+        async function saveNotesAction() {
+            const text = myNotes.value;
+            saveStatus.textContent = "保存中...";
+            saveStatus.className = "text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded transition-all duration-200 opacity-100 animate-pulse";
+
+            let savedCloud = false;
+            let savedLocal = false;
+
+            if (db && user) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'notes', cloudDocId);
+                    await setDoc(docRef, { text: text, updatedAt: new Date().toISOString() }, { merge: true });
+                    savedCloud = true;
+                } catch (err) {
+                    console.error("クラウド保存失敗:", err);
+                }
+            }
+
+            if (isLocalStorageAvailable()) {
+                try {
+                    localStorage.setItem(storageKey, text);
+                    savedLocal = true;
+                } catch (err) {
+                    console.error("ローカル保存失敗:", err);
+                }
+            }
+
+            if (savedCloud && savedLocal) {
+                showSaveStatus("保存完了(クラウド＆ローカル)");
+            } else if (savedCloud) {
+                showSaveStatus("保存完了(クラウド同期)");
+            } else if (savedLocal) {
+                showSaveStatus("保存完了(ブラウザ保存)");
+            } else {
+                showSaveStatus("保存不可");
+            }
+        }
+
+        let saveTimeout = null;
+        function handleNoteInput() {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                const text = myNotes.value;
+                if (isLocalStorageAvailable()) {
+                    try {
+                        localStorage.setItem(storageKey, text);
+                    } catch (e) {
+                        console.error("自動一時セーブ失敗:", e);
+                    }
+                }
+            }, 1000); 
+        }
+
+        function showSaveStatus(text) {
+            saveStatus.textContent = text;
+            saveStatus.className = "text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded transition-all duration-300 opacity-100";
+            setTimeout(() => {
+                saveStatus.classList.replace('opacity-100', 'opacity-0');
+            }, 2500);
+        }
+
+        btnCopyNotes.onclick = () => {
+            const textToCopy = myNotes.value;
+            if (!textToCopy.trim()) return;
+
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = textToCopy;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    copyAlert.classList.remove('hidden');
+                    setTimeout(() => {
+                        copyAlert.classList.add('hidden');
+                    }, 2000);
+                }
+            } catch (err) {
+                console.error('コピーに失敗しました:', err);
+            } finally {
+                document.body.removeChild(tempTextArea);
+            }
+        };
+
+        btnClearNotes.onclick = () => {
+            myNotes.value = '';
+            handleNoteInput(); 
+        };
+
+        // --- イベントリスナー登録 ---
+        btnPlayAll.onclick = () => {
+            if (isLoopingAll) stopAudio();
+            else playAllFromStart();
+        };
+        btnStop.onclick = stopAudio;
+        btnRecord.onclick = toggleRecording;
+        btnPlayRec.onclick = playRecordedAudio;
+        
+        btnSaveNotes.onclick = saveNotesAction; 
+        myNotes.oninput = handleNoteInput; 
+        
+        voiceSelect.onchange = () => {
+            if (activeIndex !== null && synth.speaking) {
+                const savedIndex = activeIndex;
+                const savedLoop = isLoopingAll;
+                stopAudio();
+                isLoopingAll = savedLoop;
+                if (savedLoop) btnPlayAll.innerHTML = "<span>[一時停止中...]</span>";
+                speakSequence(savedIndex, savedLoop);
+            }
+        };
+
+        speedRange.oninput = () => {
+            const currentSpeed = parseFloat(speedRange.value).toFixed(2);
+            speedValue.textContent = `${currentSpeed}x`;
+        };
+
+        speedRange.onchange = () => {
+            if (activeIndex !== null && synth.speaking) {
+                const savedIndex = activeIndex;
+                const savedLoop = isLoopingAll;
+                stopAudio();
+                isLoopingAll = savedLoop;
+                if (savedLoop) btnPlayAll.innerHTML = "<span>[一時停止中...]</span>";
+                speakSequence(savedIndex, savedLoop);
+            }
+        };
+
+        const init = async () => {
+            setupFilenameAndKeys(); 
+            buildScriptUI();
+            buildStaticNotesUI(); 
+            await initFirebaseAndAuth();
+        };
+
+        window.onload = init;
+    </script>
+</body>
+</html>
