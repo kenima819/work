@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ビジネス英語音読トレーナー - Cadency Marketing 編</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700&family=Plus+Jakarta+Sans:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
+        }
+        .cadency-header {
+            font-family: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
+        }
+        .highlight { 
+            background-color: #ccfbf1; 
+            border-bottom: 2px solid #0d9488; 
+        }
+        .playing-row { 
+            background-color: #f0fdf4; 
+            border-left: 4px solid #059669; 
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+    <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        <!-- ヘッダーエリア -->
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-5 mb-6">
+            <div>
+                <span id="exerciseDisplay" class="text-xs font-bold tracking-widest text-teal-800 bg-teal-100 px-3 py-1 rounded-md uppercase">Exercise 054</span>
+                <h1 class="text-3xl font-extrabold text-slate-900 mt-2 cadency-header flex items-center gap-2">
+                    Cadency Marketing <span class="italic text-teal-600 font-semibold text-2xl">音読トレーニング</span>
+                </h1>
+            </div>
+            <div class="mt-3 sm:mt-0 text-sm text-slate-500 font-medium flex flex-col items-end gap-1">
+                <div>対象ファイル名: <code id="filenameDisplay" class="bg-slate-100 px-2 py-0.5 rounded text-teal-900 font-mono text-xs">kindoku_Cadency.html</code></div>
+                <div class="text-[11px] text-teal-600/90 tracking-wide uppercase font-bold">Teal & Emerald Corporate Theme</div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- 左・中央エリア：音読メインコントロール -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- コントロールパネル -->
+                <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200 space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <!-- 再生・停止 -->
+                        <div class="flex items-center gap-2">
+                            <button id="btnPlayAll" class="px-5 py-2.5 bg-gradient-to-r from-teal-600 to-teal-800 hover:from-teal-700 hover:to-teal-900 text-white font-medium rounded-xl shadow-md shadow-teal-900/10 transition flex items-center gap-2 active:scale-95">
+                                <span class="w-2.5 h-2.5 bg-white rounded-full inline-block animate-pulse"></span>
+                                <span>[再生] 全文再生</span>
+                            </button>
+                            <button id="btnStop" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition active:scale-95">
+                                [停止]
+                            </button>
+                        </div>
+
+                        <!-- 音声タイプ選択 -->
+                        <div class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200/60 min-w-[180px]">
+                            <label for="voiceSelect" class="text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Voice:</label>
+                            <select id="voiceSelect" class="bg-transparent font-semibold text-slate-700 focus:outline-none text-xs cursor-pointer w-full max-w-[200px]">
+                                <option value="">(音声読み込み中...)</option>
+                            </select>
+                        </div>
+
+                        <!-- モード切替 -->
+                        <div class="flex items-center gap-2">
+                            <label class="relative inline-flex items-center cursor-pointer select-none">
+                                <input type="checkbox" id="modeToggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
+                                <span class="ml-2 text-sm font-medium text-slate-700">1文ごとに自動停止</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- スピード調整スライダー -->
+                    <div class="bg-teal-50/40 p-4 rounded-xl border border-teal-100/60 flex flex-col sm:flex-row items-center gap-4">
+                        <div class="w-full flex items-center justify-between sm:w-auto gap-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Speed:</span>
+                            <span id="speedValue" class="text-sm font-mono font-bold text-teal-800 bg-teal-100/60 px-2.5 py-0.5 rounded">1.00x</span>
+                        </div>
+                        <input type="range" id="speedRange" min="0.5" max="2.0" step="0.05" value="1.0" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-teal-600 focus:outline-none">
+                    </div>
+
+                    <!-- 録音・フィードバックパネル -->
+                    <div class="border-t border-slate-100 pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <button id="btnRecord" class="px-5 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-md transition flex items-center justify-center gap-2 min-w-[140px] active:scale-95">
+                                <span id="recIcon">●</span> <span id="recText">録音スタート</span>
+                            </button>
+                            <button id="btnPlayRec" disabled class="px-4 py-3 bg-slate-100 text-slate-400 font-medium rounded-xl transition flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95">
+                                <span>[声再生] 自分の声を聴く</span>
+                            </button>
+                        </div>
+                        <div id="recStatus" class="text-xs font-semibold text-slate-400 flex items-center gap-1.5 px-3 py-2 bg-slate-50 rounded-lg border border-slate-200/50">
+                            <span class="w-2 h-2 rounded-full bg-slate-300 block" id="statusDot"></span>
+                            <span id="statusText">マイク待機中</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 英文・日本文本体エリア -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-4 bg-slate-50 border-b border-slate-200/80 flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-700 tracking-wider uppercase">Training Workspace</span>
+                        <span class="text-xs text-slate-500 hidden sm:inline">文をクリックすると、その文だけをお手本再生できます</span>
+                    </div>
+                    
+                    <div id="scriptContainer" class="divide-y divide-slate-100">
+                        <!-- JavaScriptで動的生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右エリア：学習サポートサイドバー -->
+            <div class="space-y-6 max-h-[85vh] overflow-y-auto pr-1">
+                
+                <!-- 語注エリア -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="font-bold text-slate-900 text-base border-b border-slate-100 pb-2 flex items-center justify-between">
+                        <span>[徹底解説・重要語注]</span>
+                        <span class="text-[11px] text-teal-800 font-bold bg-teal-50 px-2 py-0.5 rounded">Glossary</span>
+                    </h3>
+                    
+                    <!-- 【ウェブページ】語注 -->
+                    <div>
+                        <h4 class="text-xs font-bold text-teal-900 bg-teal-50 px-2 py-1 rounded-md uppercase tracking-wider mb-2">[ウェブページ（募集告知）]</h4>
+                        <div class="space-y-1.5 text-xs leading-relaxed text-slate-600 max-h-[180px] overflow-y-auto pr-1 border-b border-slate-100 pb-3">
+                            <p><strong>forum</strong> [名] 討論会</p>
+                            <p><strong>post</strong> [名] 投稿 / [動] 投稿する</p>
+                            <p><strong>join</strong> [動] 加わる、参加する</p>
+                            <p><strong>focus group</strong> [名] フォーカス・グループ（市場調査の対象グループ）</p>
+                            <p><strong>specialize</strong> [動] 専門とする</p>
+                            <p><strong>gather</strong> [動] 集める</p>
+                            <p><strong>feedback</strong> [名] フィードバック、意見</p>
+                            <p><strong>survey</strong> [名]（アンケート）調査</p>
+                            <p><strong>as</strong> [前] 〜として</p>
+                            <p><strong>founding partner</strong> [名] 共同設立者</p>
+                            <p><strong>market research firm</strong> [名] 市場調査会社</p>
+                            <p><strong>when it comes to</strong> [連] 〜に関していえば</p>
+                            <p><strong>uncover</strong> [動] 発見する、明らかにする</p>
+                            <p><strong>valuable</strong> [形] 貴重な</p>
+                            <p><strong>consumer</strong> [名] 消費者</p>
+                            <p><strong>insight</strong> [名] インサイト、洞察</p>
+                            <p><strong>in turn</strong> [連] 結果的に、それが今度は</p>
+                            <p><strong>drive</strong> [動] 原動力となる、後押しする</p>
+                            <p><strong>decision</strong> [名] 決定</p>
+                            <p><strong>client</strong> [名] 顧客、クライアント</p>
+                            <p><strong>crucial</strong> [形] きわめて重要な</p>
+                            <p><strong>therefore</strong> [副] したがって</p>
+                            <p><strong>invite</strong> [動] 求める、招待する</p>
+                            <p><strong>upcoming</strong> [形] 今度の、近く開催される</p>
+                            <p><strong>interested</strong> [形] 興味がある</p>
+                            <p><strong>complete</strong> [動] 記入する、完了する</p>
+                            <p><strong>application</strong> [名] 申込用紙、申請書</p>
+                            <p><strong>provide</strong> [動] 提供する</p>
+                            <p><strong>background</strong> [名] 経歴、背景</p>
+                            <p><strong>once</strong> [接] 〜したらすぐに</p>
+                            <p><strong>review</strong> [動] 検討する、確認する</p>
+                            <p><strong>detail</strong> [名] 詳細</p>
+                            <p><strong>match</strong> [動] 合わせる、マッチさせる</p>
+                            <p><strong>align with</strong> [連] 〜と合致する</p>
+                            <p><strong>however</strong> [副] しかしながら</p>
+                            <p><strong>ensure</strong> [動] 保証する、確実にする</p>
+                            <p><strong>continually</strong> [副] 常に</p>
+                            <p><strong>diverse</strong> [形] 多種多様な</p>
+                            <p><strong>perspective</strong> [名] 観点、視点</p>
+                            <p><strong>allow</strong> [動] 許す、認める</p>
+                            <p><strong>participant</strong> [名] 参加者</p>
+                            <p><strong>more than one</strong> [連] 2回以上（1回を超える）</p>
+                            <p><strong>compensate</strong> [動] 補償する、対価を支払う</p>
+                            <p><strong>last</strong> [動] 続く</p>
+                            <p><strong>remuneration</strong> [名] 報酬、対価</p>
+                            <p><strong>suggestion</strong> [名] 提案</p>
+                            <p><strong>feel free to do</strong> [連] 気軽に〜する</p>
+                            <p><strong>consider</strong> [動] 検討する</p>
+                            <p><strong>assist</strong> [動] 助ける、協力する</p>
+                            <p><strong>research</strong> [名] 調査</p>
+                        </div>
+                    </div>
+
+                    <!-- 【メール】語注 -->
+                    <div class="pt-1">
+                        <h4 class="text-xs font-bold text-teal-900 bg-teal-50 px-2 py-1 rounded-md uppercase tracking-wider mb-2">[メール（案内・招待）]</h4>
+                        <div class="space-y-1.5 text-xs leading-relaxed text-slate-600 max-h-[180px] overflow-y-auto pr-1 border-b border-slate-100 pb-3">
+                            <p><strong>invitation</strong> [名] 招待、ご案内</p>
+                            <p><strong>contact</strong> [動] 連絡する</p>
+                            <p><strong>inform</strong> [動] 知らせる</p>
+                            <p><strong>designated</strong> [形] 指定された</p>
+                            <p><strong>time period</strong> [名] 期間</p>
+                            <p><strong>elapse</strong> [動] 経過する、（時が）過ぎる</p>
+                            <p><strong>extend an invitation</strong> [連] 招待する</p>
+                            <p><strong>participation</strong> [名] 参加</p>
+                            <p><strong>theme</strong> [名] テーマ</p>
+                            <p><strong>take place</strong> [連] 行われる</p>
+                            <p><strong>located</strong> [形] 〜にある、位置する</p>
+                            <p><strong>express</strong> [動] 表す</p>
+                            <p><strong>interest</strong> [名] 関心、興味</p>
+                            <p><strong>confirm</strong> [動] 確認する</p>
+                            <p><strong>availability</strong> [名] 都合、参加可能性</p>
+                            <p><strong>kindly</strong> [副] どうか、どうぞ</p>
+                            <p><strong>reply</strong> [動] 返答する</p>
+                            <p><strong>at your earliest convenience</strong> [連] できるだけ早急に</p>
+                            <p><strong>following</strong> [前] 〜の後で</p>
+                            <p><strong>confirmation</strong> [名] 確認</p>
+                            <p><strong>information pack</strong> [名] 情報一式、資料パック</p>
+                            <p><strong>including</strong> [前] 〜を含む</p>
+                            <p><strong>pertinent</strong> [形] 関連した、適切な</p>
+                            <p><strong>objective</strong> [名] 目的</p>
+                            <p><strong>look forward to</strong> [連] 〜を楽しみにする</p>
+                            <p><strong>hear from</strong> [連] 〜から連絡がある</p>
+                        </div>
+                    </div>
+
+                    <!-- 【ウェブフォーラム・設問】語注 -->
+                    <div class="pt-1">
+                        <h4 class="text-xs font-bold text-teal-900 bg-teal-50 px-2 py-1 rounded-md uppercase tracking-wider mb-2">[フォーラム投稿＆設問・選択肢]</h4>
+                        <div class="space-y-1.5 text-xs leading-relaxed text-slate-600 max-h-[180px] overflow-y-auto pr-1">
+                            <p><strong>organize</strong> [動] 取りまとめる、主催する</p>
+                            <p><strong>earn</strong> [動] 得る、獲得する</p>
+                            <p><strong>opinion</strong> [名] 意見</p>
+                            <p><strong>during</strong> [前] 〜の間</p>
+                            <p><strong>lively</strong> [形] 活発な</p>
+                            <p><strong>a bunch of</strong> [連] たくさんの</p>
+                            <p><strong>emerging</strong> [形] 新たに現れる、新興の</p>
+                            <p><strong>for instance</strong> [連] たとえば</p>
+                            <p><strong>amenity</strong> [名] 快適設備、アメニティ</p>
+                            <p><strong>booking</strong> [名] 予約</p>
+                            <p><strong>in-flight</strong> [形] 機内の</p>
+                            <p><strong>facilitator</strong> [名] 進行役、ファシリテーター</p>
+                            <p><strong>skillfully</strong> [副] 上手に、巧みに</p>
+                            <p><strong>guide</strong> [動] 誘導する、案内する</p>
+                            <p><strong>conversation</strong> [名] 会話、議論</p>
+                            <p><strong>create</strong> [動] 作り出す</p>
+                            <p><strong>comfortable</strong> [形] 心地よい</p>
+                            <p><strong>atmosphere</strong> [名] 雰囲気</p>
+                            <p><strong>take part</strong> [連] 参加する</p>
+                            <p><strong>look to do</strong> [連] 〜しようとする</p>
+                            <p><strong>voice</strong> [名] 意見、声</p>
+                            <p><strong>complimentary</strong> [形] 無料の</p>
+                            <p><strong>initial</strong> [形] 最初の</p>
+                            <p><strong>consultation</strong> [名] 相談</p>
+                            <p><strong>primarily</strong> [副] 主に</p>
+                            <p><strong>recently</strong> [副] 最近</p>
+                            <p><strong>merge</strong> [動] 合併する</p>
+                            <p><strong>competitor</strong> [名] 競合相手</p>
+                            <p><strong>co-found</strong> [動] 共同設立する</p>
+                            <p><strong>leading</strong> [形] 一流の、主要な</p>
+                            <p><strong>organization</strong> [名] 団体、組織</p>
+                            <p><strong>state</strong> [動] 述べる</p>
+                            <p><strong>requirement</strong> [名] 要件、必要条件</p>
+                            <p><strong>prior to</strong> [連] 〜の前に</p>
+                            <p><strong>participate</strong> [動] 参加する</p>
+                            <p><strong>attend</strong> [動] 出席する</p>
+                            <p><strong>fill out</strong> [連] 〜に記入する</p>
+                            <p><strong>recommendation</strong> [名] 推薦状</p>
+                            <p><strong>certification</strong> [名] 資格証明</p>
+                            <p><strong>conclude</strong> [動] 結論付ける</p>
+                            <p><strong>dissatisfied</strong> [形] 不満で</p>
+                            <p><strong>recent</strong> [形] 最近の</p>
+                            <p><strong>long distance</strong> [名] 長距離</p>
+                            <p><strong>get to</strong> [連] 〜にたどり着く</p>
+                            <p><strong>colleague</strong> [名] 同僚</p>
+                            <p><strong>used to do</strong> [連] 以前は〜していた</p>
+                            <p><strong>domestic</strong> [形] 国内の</p>
+                            <p><strong>promote</strong> [動] 宣伝する</p>
+                            <p><strong>conference</strong> [名] 会議</p>
+                            <p><strong>recruit</strong> [動] 募集する</p>
+                            <p><strong>recommend</strong> [動] 勧められる</p>
+                            <p><strong>opportunity</strong> [名] 機会</p>
+                            <p><strong>infer</strong> [動] 推測する</p>
+                            <p><strong>facilitate</strong> [動] 円滑に進める</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- マイコメント / 学習メモカード -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                        <h3 class="font-bold text-slate-900 text-base">
+                            [マイコメント / 学習メモ]
+                        </h3>
+                        <span id="saveStatus" class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded transition-all duration-300 opacity-0">保存完了</span>
+                    </div>
+                    
+                    <!-- 発音リンキング情報エリア -->
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-bold text-teal-800 uppercase tracking-wider">[重要リンキング・発音解説]</h4>
+                        <ul id="staticNotesList" class="list-disc list-outside pl-4 text-xs text-slate-700 space-y-1.5 leading-relaxed">
+                            <!-- JS内の「staticNotes」配列データが自動生成されます -->
+                        </ul>
+                    </div>
+
+                    <!-- その場の一時メモ記入エリア -->
+                    <div class="space-y-3 pt-3 border-t border-slate-100">
+                        <h4 class="text-xs font-bold text-teal-800 uppercase tracking-wider">[その場の一時メモ]</h4>
+                        <p class="text-[11px] text-slate-400 leading-relaxed">
+                            ※この入力内容はブラウザに自動的・一時的にバックアップされます。
+                        </p>
+                        <textarea id="myNotes" rows="5" class="w-full p-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 placeholder-slate-400" placeholder="リンキングの気づきや自身の苦手な箇所のメモ書きなどにお使いください。"></textarea>
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="btnSaveNotes" class="py-2.5 px-3 bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95">
+                                メモを保存する
+                            </button>
+                            <button id="btnCopyNotes" class="py-2.5 px-3 bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-bold rounded-xl transition-all">
+                                メモをコピー
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1">
+                            <button id="btnClearNotes" class="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-500 text-xs font-semibold rounded-xl transition-all">
+                                クリア
+                            </button>
+                        </div>
+                        <div id="copyAlert" class="text-[11px] text-emerald-600 font-semibold text-center hidden">
+                            コピーしました！クリップボードに保存されています。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK / アプリケーション主要ロジック -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // =========================================================================
+        // 💡 【重要リンキング・発音解説メモの編集エリア】
+        // =========================================================================
+        const staticNotes = [
+            "specializes in ➔ スペシャライゼズ・イン（s 音と in の i がスムーズに連結します）",
+            "comes to ➔ カムズ・トゥ（comes の s/z 音から to への移行を滑らかに）",
+            "in turn ➔ イン・ターン（n 音から t 音へ息を途切らせずに流します）",
+            "part of ➔ パート・オヴ ➔ パータヴ（t 音がフラップ化して a 音と連結します）",
+            "complete our ➔ コンプリート・アワ（t 音と our の o 音が連結します）",
+            "once we have ➔ ワンス・ウィー・ハヴ（once の s 音から we へとスムーズに接続）",
+            "align with ➔ アライン・ウィズ（n 音と with がスムーズにつながります）",
+            "more than one ➔ モア・ザン・ワン（n 音から one の w 音の流れを意識）",
+            "take place in ➔ テイク・プレイス・イン（s 音と in が連結して『プレイスイン』）",
+            "at your earliest ➔ アッチャ・アーリエスト（at の t と your の y 音が同化）",
+            "earned $150 ➔ アールンド・ワンハンドレッドフィフティ（d 音と one が軽く接続）",
+            "bunch of emerging ➔ バンチ・オヴ・イマージング（ch 音と of、of の v 音と emerging が連続連結）",
+            "for instance ➔ フォー・インスタンス（r 音と i 音がなめらかに繋がります）",
+            "ten of us who took part ➔ テン・ナヴ・アス・フー・トゥック・パート（n 音と of、of の v 音と us が連結）"
+        ];
+
+        // --- 英文・日本語データ定義（Cadency Marketing） ---
+        const speechData = [
+            {
+                speaker: "Web Page Title",
+                time: "Heading",
+                en: "Join our focus groups!",
+                ja: "当社のフォーカス・グループにご参加ください!"
+            },
+            {
+                speaker: "Web Page",
+                time: "Paragraph 1-1",
+                en: "Cadency Marketing specializes in gathering feedback through focus groups and customer surveys.",
+                ja: "ケイデンシー・マーケティングは、フォーカス・グループや顧客調査を通してフィードバックを集めることを専門としています。"
+            },
+            {
+                speaker: "Web Page",
+                time: "Paragraph 1-2",
+                en: "As a founding partner of Analytica Plus, one of the nation’s top market research firms, we’re experts when it comes to uncovering valuable consumer insights, which in turn drive the business decisions of our clients.",
+                ja: "全米トップクラスの市場調査会社、アナリティカ・プラスの共同設立者である当社は、クライアントのビジネス上の意思決定を後押しする貴重な消費者インサイトを発見するエキスパートです。"
+            },
+            {
+                speaker: "Web Page",
+                time: "Paragraph 1-3",
+                en: "Your skills and experiences are crucial to this process, and we therefore invite you to be part of our upcoming sessions.",
+                ja: "このプロセスには、皆様のスキルや経験が欠かせません。ですので、是非今後のセッションにご参加ください。"
+            },
+            {
+                speaker: "Web Page",
+                time: "Paragraph 2-1",
+                en: "If you are interested in joining a session, you will need to complete our online application here to provide us with more information about yourself and your background.",
+                ja: "セッションへの参加にご興味のある方は、こちらのオンライン申込書にご記入の上、詳しいご自身の情報と経歴をご提供ください。"
+            },
+            {
+                speaker: "Web Page",
+                time: "Paragraph 2-2",
+                en: "Once we have reviewed these details, we’ll match you with focus groups that align with your profile.",
+                ja: "これらの詳細を確認後、プロフィールに合ったフォーカス・グループをご紹介します。"
+            },
+            {
+                speaker: "Web Page",
+                time: "Paragraph 2-3",
+                en: "However, to ensure that we continually receive diverse perspectives, we do not allow participants to join more than one session within a two-month period.",
+                ja: "ただし、常に多様な視点からのご意見をいただくため、2 カ月間に 2 回以上のセッションへのご参加はお断りしています。"
+            },
+            {
+                speaker: "Web Page",
+                time: "Paragraph 3-1",
+                en: "You will be compensated for your time, with sessions lasting between one and three hours.",
+                ja: "セッションは 1 〜 3 時間で、時間に応じて報酬が支払われます。"
+            },
+            {
+                speaker: "Web Page",
+                time: "Paragraph 3-2",
+                en: "Remuneration: 1 hour: $70, 2 hours: $150, 3 hours: $240",
+                ja: "報酬：1 時間：70 ドル、2 時間：150 ドル、3 時間：240 ドル"
+            },
+            {
+                speaker: "Web Page",
+                time: "Paragraph 4-1",
+                en: "We also welcome ideas.",
+                ja: "当社ではアイディアも歓迎します。"
+            },
+            {
+                speaker: "Web Page",
+                time: "Paragraph 4-2",
+                en: "If you have any suggestions for future focus group topics, feel free to share them in the application form.",
+                ja: "今後のフォーカス・グループのテーマについて何かご提案がありましたら、お気軽に申込用紙にご記入ください。"
+            },
+            {
+                speaker: "Web Page",
+                time: "Paragraph 4-3",
+                en: "And thank you for considering assisting us with our research.",
+                ja: "当社の調査へのご協力をご検討いただき、ありがとうございます。"
+            },
+            {
+                speaker: "Email Header",
+                time: "Header Info",
+                en: "To: Shunsuke Miura <smiura@hawkmail.com>\nFrom: Pauline Whelan <pwhelan@cadencymarketing.com>\nDate: August 27\nSubject: Focus group invitation",
+                ja: "宛先：シュンスケ・ミウラ <smiura@hawkmail.com>\n送信者：ポーリン・ウィーラン <pwhelan@cadencymarketing.com>\n日付：8 月 27 日\n件名：フォーカス・グループのご案内"
+            },
+            {
+                speaker: "Pauline Whelan",
+                time: "Salutation",
+                en: "Dear Mr. Miura,",
+                ja: "ミウラ様"
+            },
+            {
+                speaker: "Pauline Whelan",
+                time: "Paragraph 1-1",
+                en: "Thank you for contacting us about our upcoming focus groups.",
+                ja: "近々行われる弊社のフォーカス・グループについてご連絡いただきありがとうございます。"
+            },
+            {
+                speaker: "Pauline Whelan",
+                time: "Paragraph 1-2",
+                en: "We are happy to inform you that the designated time period has elapsed, so we can now extend a new invitation for your participation in another focus group.",
+                ja: "指定期間が過ぎましたので、新たに別のフォーカス・グループへのご招待をさせていただきます。"
+            },
+            {
+                speaker: "Pauline Whelan",
+                time: "Paragraph 1-3",
+                en: "This time, the theme will be “Passenger Perspectives on Air Travel Trends.”",
+                ja: "今回のテーマは「空の旅のトレンドに関する乗客の視点」です。"
+            },
+            {
+                speaker: "Pauline Whelan",
+                time: "Paragraph 1-4",
+                en: "The session will take place in the morning of September 18 at our office located at 348 Virginia Street.",
+                ja: "セッションは 9 月 18 日の午前中、ヴァージニア通り 348 番地にある弊社オフィスにて行われます。"
+            },
+            {
+                speaker: "Pauline Whelan",
+                time: "Paragraph 2-1",
+                en: "To express your interest in joining this session and to confirm your availability, kindly reply to this e-mail at your earliest convenience.",
+                ja: "このセッションへの参加にご興味がありご都合がつく場合は、なるべく早くこのメールにご返信ください。"
+            },
+            {
+                speaker: "Pauline Whelan",
+                time: "Paragraph 2-2",
+                en: "Following your confirmation, we will provide you with an information pack, including all the pertinent details about the session and its objectives.",
+                ja: "ご確認後、本セッションに関する詳細とその目的を記載した情報一式をお送りいたします。"
+            },
+            {
+                speaker: "Pauline Whelan",
+                time: "Paragraph 3",
+                en: "We look forward to hearing from you.",
+                ja: "ご連絡をお待ちしております。"
+            },
+            {
+                speaker: "Pauline Whelan",
+                time: "Signoff",
+                en: "Pauline Whelan\nResearch Coordinator\nCadency Marketing",
+                ja: "ポーリン・ウィーラン\nリサーチ・コーディネーター\nケイデンシー・マーケティング"
+            },
+            {
+                speaker: "Forum Post Meta",
+                time: "Header Info",
+                en: "Posted by Shunsuke Miura on September 19",
+                ja: "投稿者：シュンスケ・ミウラ　投稿日：9 月 19 日"
+            },
+            {
+                speaker: "Shunsuke Miura",
+                time: "Paragraph 1-1",
+                en: "I joined a focus group discussion organized by Cadency Marketing yesterday and earned $150 for sharing my opinions.",
+                ja: "昨日、ケイデンシー・マーケティング主催のフォーカス・グループ・ディスカッションに参加し、意見をシェアして 150 ドルを得ました。"
+            },
+            {
+                speaker: "Shunsuke Miura",
+                time: "Paragraph 1-2",
+                en: "During the session, participants had a lively discussion about a bunch of emerging trends in air travel.",
+                ja: "セッション中、参加者は空の旅におけるたくさんの新しいトレンドについて活発な議論を交わしました。"
+            },
+            {
+                speaker: "Shunsuke Miura",
+                time: "Paragraph 1-3",
+                en: "For instance, we talked about amenities on flights, new technologies for booking and check-in processes, and also in-flight entertainment options.",
+                ja: "たとえば、フライト中のアメニティ、予約やチェックインのプロセスのための新テクノロジー、機内エンターテイメントのオプションなどです。"
+            },
+            {
+                speaker: "Shunsuke Miura",
+                time: "Paragraph 1-4",
+                en: "The facilitator skillfully guided the conversation, creating a comfortable atmosphere for all ten of us who took part.",
+                ja: "進行役がうまく会話を誘導して、参加した私たち 10 人全員に心地よい雰囲気を作ってくれました。"
+            },
+            {
+                speaker: "Shunsuke Miura",
+                time: "Paragraph 1-5",
+                en: "We had lots of fun!",
+                ja: "とても楽しかったです!"
+            },
+            {
+                speaker: "Shunsuke Miura",
+                time: "Paragraph 1-6",
+                en: "If you’re looking to make your voice heard and get paid for it, consider contacting Cadency Marketing and joining a session.",
+                ja: "自分の意見を聞いてもらって、その対価として報酬を得たいとお考えでしたら、ケイデンシー・マーケティングに連絡して、セッションへの参加を検討してみてください。"
+            }
+        ];
+
+        // --- 状態管理変数 ---
+        const synth = window.speechSynthesis;
+        let currentUtterance = null;
+        let activeIndex = null;
+        let isLoopingAll = false;
+        let speechVoices = [];
+        
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let audioUrl = null;
+        let isRecording = false;
+
+        // --- Firebase/Firestore関連変数 ---
+        let db = null;
+        let auth = null;
+        let user = null;
+        let appId = 'default-app-id';
+
+        // --- 動的なファイル名およびストレージキー管理 ---
+        let currentFilename = "kindoku_Cadency.html";
+        let storageKey = "kindoku_notes_Cadency";
+        let cloudDocId = "kindoku_Cadency";
+
+        // --- DOM要素取得 ---
+        const scriptContainer = document.getElementById('scriptContainer');
+        const btnPlayAll = document.getElementById('btnPlayAll');
+        const btnStop = document.getElementById('btnStop');
+        const voiceSelect = document.getElementById('voiceSelect');
+        const speedRange = document.getElementById('speedRange');
+        const speedValue = document.getElementById('speedValue');
+        const modeToggle = document.getElementById('modeToggle');
+        
+        const btnRecord = document.getElementById('btnRecord');
+        const btnPlayRec = document.getElementById('btnPlayRec');
+        const recIcon = document.getElementById('recIcon');
+        const recText = document.getElementById('recText');
+        const recStatus = document.getElementById('recStatus');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+
+        // --- メモ機能用DOM要素取得 ---
+        const myNotes = document.getElementById('myNotes');
+        const btnSaveNotes = document.getElementById('btnSaveNotes');
+        const btnCopyNotes = document.getElementById('btnCopyNotes');
+        const btnClearNotes = document.getElementById('btnClearNotes');
+        const copyAlert = document.getElementById('copyAlert');
+        const saveStatus = document.getElementById('saveStatus');
+        const staticNotesList = document.getElementById('staticNotesList');
+
+        // --- ファイル名、ストレージキー、およびEXERCISEラベルを自動検出・設定する関数 ---
+        function setupFilenameAndKeys() {
+            try {
+                const path = window.location.pathname;
+                const filename = path.substring(path.lastIndexOf('/') + 1);
+                
+                if (filename && filename.includes('.html')) {
+                    currentFilename = filename;
+                    document.getElementById('filenameDisplay').textContent = filename;
+                    
+                    const nameWithoutExt = filename.replace('.html', '');
+                    storageKey = `kindoku_notes_${nameWithoutExt}`;
+                    cloudDocId = nameWithoutExt;
+
+                    const exMatch = filename.match(/Ex_?(\d+)/i) || filename.match(/(\d+)/);
+                    if (exMatch && exMatch[1]) {
+                        const numStr = exMatch[1];
+                        const formattedNum = numStr.length === 1 ? `00${numStr}` : (numStr.length === 2 ? `0${numStr}` : numStr);
+                        
+                        document.getElementById('exerciseDisplay').textContent = `Exercise ${formattedNum}`;
+                    }
+                }
+            } catch (e) {
+                console.error("ファイル名自動同期処理エラー:", e);
+            }
+        }
+
+        // --- 固定メモのリストを画面に組み立てる関数 ---
+        function buildStaticNotesUI() {
+            staticNotesList.innerHTML = '';
+            if (staticNotes.length === 0) {
+                staticNotesList.innerHTML = `<li class="text-slate-400 italic">（固定発音メモは未設定です）</li>`;
+                return;
+            }
+            staticNotes.forEach(note => {
+                const li = document.createElement('li');
+                li.textContent = note;
+                staticNotesList.appendChild(li);
+            });
+        }
+
+        // --- 音声リストの取得と生成 ---
+        function loadVoices() {
+            if (!synth) return;
+            const allVoices = synth.getVoices();
+            speechVoices = allVoices.filter(voice => voice.lang.startsWith('en'));
+            
+            if (speechVoices.length === 0) {
+                speechVoices = allVoices;
+            }
+
+            voiceSelect.innerHTML = '';
+            if (speechVoices.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = "";
+                opt.textContent = "標準ブラウザ音声";
+                voiceSelect.appendChild(opt);
+                return;
+            }
+
+            speechVoices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                
+                let genderTag = "";
+                const nameLower = voice.name.toLowerCase();
+                if (nameLower.includes('david') || nameLower.includes('george') || nameLower.includes('male') || nameLower.includes('ravi') || nameLower.includes('mark') || nameLower.includes('daniel')) {
+                    genderTag = "[男声] ";
+                } else if (nameLower.includes('zira') || nameLower.includes('female') || nameLower.includes('hazel') || nameLower.includes('susan') || nameLower.includes('haruka') || nameLower.includes('lisa') || nameLower.includes('samantha')) {
+                    genderTag = "[女声] ";
+                } else {
+                    genderTag = "[音声] ";
+                }
+
+                const isDefault = voice.default ? " (推奨)" : "";
+                option.textContent = `${genderTag}${voice.name} (${voice.lang})${isDefault}`;
+                voiceSelect.appendChild(option);
+            });
+
+            // 推奨音声の自動選択
+            const preferredIndex = speechVoices.findIndex(v => 
+                v.name.includes('Google US English') || 
+                v.name.includes('Zira') || 
+                v.name.includes('David') ||
+                v.name.includes('Samantha')
+            );
+            if (preferredIndex !== -1) {
+                voiceSelect.value = preferredIndex;
+            }
+        }
+
+        if (typeof synth !== 'undefined' && synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = loadVoices;
+        }
+
+        // --- 画面初期ビルド ---
+        function buildScriptUI() {
+            scriptContainer.innerHTML = '';
+            speechData.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.id = `row-${index}`;
+                row.className = "p-4 sm:p-5 transition-all duration-200 cursor-pointer hover:bg-slate-50 flex flex-col gap-1.5";
+                row.onclick = () => playSingleRow(index);
+
+                // 各行の話者や機能に応じて色分けバッジを配置
+                let partBadge = "";
+                if (item.speaker === "Web Page Title" || item.speaker === "Web Page") {
+                    partBadge = `<span class="bg-teal-100 text-teal-900 text-[10px] font-bold px-2 py-0.5 rounded-md">Web Announcement</span>`;
+                } else if (item.speaker === "Email Header" || item.speaker === "Pauline Whelan") {
+                    partBadge = `<span class="bg-sky-100 text-sky-900 text-[10px] font-bold px-2 py-0.5 rounded-md">Invitation Email</span>`;
+                } else if (item.speaker === "Forum Post Meta" || item.speaker === "Shunsuke Miura") {
+                    partBadge = `<span class="bg-emerald-100 text-emerald-900 text-[10px] font-bold px-2 py-0.5 rounded-md">Forum Post</span>`;
+                } else {
+                    partBadge = `<span class="bg-slate-100 text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-md">${item.speaker}</span>`;
+                }
+
+                row.innerHTML = `
+                    <div class="flex items-center gap-2 select-none">
+                        <span class="text-xs font-bold text-slate-400">Statement ${index + 1}</span>
+                        ${partBadge}
+                        <span class="text-[10px] text-slate-400 font-mono">${item.time}</span>
+                    </div>
+                    <!-- 英文テキスト -->
+                    <div class="text-base sm:text-lg font-semibold text-slate-900 leading-relaxed tracking-wide mt-1 whitespace-pre-line font-sans" id="en-${index}">
+                        ${item.en}
+                    </div>
+                    <!-- 日本語和訳テキスト -->
+                    <div class="text-xs sm:text-sm text-slate-500 font-medium mt-0.5 whitespace-pre-line leading-relaxed">
+                        ${item.ja}
+                    </div>
+                `;
+                scriptContainer.appendChild(row);
+            });
+            loadVoices();
+        }
+
+        // --- 音声合成（TTS）処理 ---
+        function stopAudio() {
+            isLoopingAll = false;
+            synth.cancel();
+            if (currentUtterance) currentUtterance = null;
+            clearVisualHighlights();
+            btnPlayAll.innerHTML = "<span>[再生] 全文再生</span>";
+        }
+
+        function clearVisualHighlights() {
+            speechData.forEach((_, i) => {
+                const r = document.getElementById(`row-${i}`);
+                const e = document.getElementById(`en-${i}`);
+                if (r) r.classList.remove('playing-row');
+                if (e) e.classList.remove('highlight');
+            });
+            activeIndex = null;
+        }
+
+        function highlightRow(index) {
+            clearVisualHighlights();
+            activeIndex = index;
+            const row = document.getElementById(`row-${index}`);
+            const enText = document.getElementById(`en-${index}`);
+            if (row) row.classList.add('playing-row');
+            if (enText) enText.classList.add('highlight');
+            
+            row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function playSingleRow(index) {
+            stopAudio();
+            speakSequence(index, false);
+        }
+
+        // 全文再生
+        function playAllFromStart() {
+            stopAudio();
+            isLoopingAll = true;
+            btnPlayAll.innerHTML = "<span>[一時停止中...]</span>";
+            speakSequence(0, true);
+        }
+
+        function speakSequence(index, continueNext = false) {
+            if (index >= speechData.length || (!isLoopingAll && continueNext)) {
+                stopAudio();
+                return;
+            }
+
+            highlightRow(index);
+            synth.cancel();
+
+            let speakEn = speechData[index].en;
+            currentUtterance = new SpeechSynthesisUtterance(speakEn);
+            
+            if (speechVoices.length > 0 && voiceSelect.value !== "") {
+                const selectedVoice = speechVoices[parseInt(voiceSelect.value)];
+                if (selectedVoice) {
+                    currentUtterance.voice = selectedVoice;
+                    currentUtterance.lang = selectedVoice.lang;
+                }
+            } else {
+                currentUtterance.lang = 'en-US';
+            }
+
+            currentUtterance.rate = parseFloat(speedRange.value);
+
+            currentUtterance.onend = () => {
+                if (continueNext && isLoopingAll) {
+                    const isStepMode = modeToggle.checked;
+                    if (isStepMode) {
+                        btnPlayAll.innerHTML = "<span>[再生] 全文再生</span>";
+                        isLoopingAll = false; 
+                    } else {
+                        speakSequence(index + 1, true);
+                    }
+                } else if (!continueNext) {
+                    clearVisualHighlights();
+                }
+            };
+
+            currentUtterance.onerror = () => {
+                clearVisualHighlights();
+            };
+
+            synth.speak(currentUtterance);
+        }
+
+        // --- マイク録音処理 ---
+        async function toggleRecording() {
+            if (!isRecording) {
+                audioChunks = [];
+                try {
+                    synth.cancel(); 
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    
+                    mediaRecorder.ondataavailable = (e) => {
+                        if (e.data.size > 0) audioChunks.push(e.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                        audioUrl = URL.createObjectURL(audioBlob);
+                        btnPlayRec.disabled = false;
+                        btnPlayRec.classList.remove('bg-slate-100', 'text-slate-400');
+                        btnPlayRec.classList.add('bg-teal-100', 'text-teal-800', 'hover:bg-teal-200');
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    
+                    recIcon.textContent = "■";
+                    recText.textContent = "録音を停止";
+                    btnRecord.classList.replace('bg-red-600', 'bg-slate-800');
+                    btnRecord.classList.replace('hover:bg-red-700', 'hover:bg-slate-900');
+                    
+                    statusDot.classList.replace('bg-slate-300', 'bg-red-600');
+                    statusDot.classList.add('animate-ping');
+                    statusText.textContent = "マイク録音中...";
+                    statusText.classList.add('text-red-600');
+                } catch (err) {
+                    console.error("マイク接続エラー:", err);
+                    statusText.textContent = "マイクアクセスエラー";
+                    statusText.classList.add('text-red-600');
+                }
+            } else {
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                }
+                isRecording = false;
+                
+                recIcon.textContent = "●";
+                recText.textContent = "録音スタート";
+                btnRecord.classList.replace('bg-slate-800', 'bg-red-600');
+                btnRecord.classList.replace('hover:bg-slate-900', 'hover:bg-red-700');
+                
+                statusDot.classList.remove('animate-ping');
+                statusDot.classList.replace('bg-red-600', 'bg-emerald-500');
+                statusText.textContent = "録音完了（再生可能）";
+                statusText.classList.replace('text-red-600', 'text-emerald-600');
+            }
+        }
+
+        function playRecordedAudio() {
+            if (audioUrl) {
+                synth.cancel();
+                const audio = new Audio(audioUrl);
+                audio.play();
+            }
+        }
+
+        // --- クラウド＆ローカル保存処理 (手動セーブ) ---
+        function isLocalStorageAvailable() {
+            try {
+                const testKey = '__storage_test__';
+                localStorage.setItem(testKey, testKey);
+                localStorage.removeItem(testKey);
+                return true;
+            } catch (e) {
+                return false; 
+            }
+        }
+
+        const initFirebaseAndAuth = async () => {
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                try {
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    const app = initializeApp(firebaseConfig);
+                    auth = getAuth(app);
+                    db = getFirestore(app);
+                    appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+
+                    onAuthStateChanged(auth, async (u) => {
+                        user = u;
+                        await loadNotes(); 
+                    });
+                } catch (err) {
+                    console.error("クラウド接続エラー。ローカル保存へ移行します。:", err);
+                    await loadNotes();
+                }
+            } else {
+                await loadNotes();
+            }
+        };
+
+        async function loadNotes() {
+            let loadedText = "";
+            if (isLocalStorageAvailable()) {
+                try {
+                    const localData = localStorage.getItem(storageKey);
+                    if (localData !== null) {
+                        loadedText = localData;
+                        myNotes.value = localData;
+                    }
+                } catch (e) {
+                    console.error("ローカルデータ読み込み例外:", e);
+                }
+            }
+
+            if (db && user) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'notes', cloudDocId);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        const cloudData = docSnap.data().text || '';
+                        if (!loadedText || loadedText !== cloudData) {
+                            myNotes.value = cloudData;
+                            if (isLocalStorageAvailable()) {
+                                localStorage.setItem(storageKey, cloudData);
+                            }
+                        }
+                    }
+                } catch (err) {
+                    console.error("クラウドメモ読み込みエラー:", err);
+                }
+            }
+        }
+
+        async function saveNotesAction() {
+            const text = myNotes.value;
+            saveStatus.textContent = "保存中...";
+            saveStatus.className = "text-[10px] font-bold text-teal-600 bg-teal-50 px-2 py-0.5 rounded transition-all duration-200 opacity-100 animate-pulse";
+
+            let savedCloud = false;
+            let savedLocal = false;
+
+            if (db && user) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'notes', cloudDocId);
+                    await setDoc(docRef, { text: text, updatedAt: new Date().toISOString() }, { merge: true });
+                    savedCloud = true;
+                } catch (err) {
+                    console.error("クラウド保存失敗:", err);
+                }
+            }
+
+            if (isLocalStorageAvailable()) {
+                try {
+                    localStorage.setItem(storageKey, text);
+                    savedLocal = true;
+                } catch (err) {
+                    console.error("ローカル保存失敗:", err);
+                }
+            }
+
+            if (savedCloud && savedLocal) {
+                showSaveStatus("保存完了(クラウド＆ローカル)");
+            } else if (savedCloud) {
+                showSaveStatus("保存完了(クラウド同期)");
+            } else if (savedLocal) {
+                showSaveStatus("保存完了(ブラウザ保存)");
+            } else {
+                showSaveStatus("保存不可");
+            }
+        }
+
+        let saveTimeout = null;
+        function handleNoteInput() {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                const text = myNotes.value;
+                if (isLocalStorageAvailable()) {
+                    try {
+                        localStorage.setItem(storageKey, text);
+                    } catch (e) {
+                        console.error("自動一時セーブ失敗:", e);
+                    }
+                }
+            }, 1000); 
+        }
+
+        function showSaveStatus(text) {
+            saveStatus.textContent = text;
+            saveStatus.className = "text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded transition-all duration-300 opacity-100";
+            setTimeout(() => {
+                saveStatus.classList.replace('opacity-100', 'opacity-0');
+            }, 2500);
+        }
+
+        btnCopyNotes.onclick = () => {
+            const textToCopy = myNotes.value;
+            if (!textToCopy.trim()) return;
+
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = textToCopy;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    copyAlert.classList.remove('hidden');
+                    setTimeout(() => {
+                        copyAlert.classList.add('hidden');
+                    }, 2000);
+                }
+            } catch (err) {
+                console.error('コピーに失敗しました:', err);
+            } finally {
+                document.body.removeChild(tempTextArea);
+            }
+        };
+
+        btnClearNotes.onclick = () => {
+            myNotes.value = '';
+            handleNoteInput(); 
+        };
+
+        // --- イベントリスナー登録 ---
+        btnPlayAll.onclick = () => {
+            if (isLoopingAll) stopAudio();
+            else playAllFromStart();
+        };
+        btnStop.onclick = stopAudio;
+        btnRecord.onclick = toggleRecording;
+        btnPlayRec.onclick = playRecordedAudio;
+        
+        btnSaveNotes.onclick = saveNotesAction; 
+        myNotes.oninput = handleNoteInput; 
+        
+        voiceSelect.onchange = () => {
+            if (activeIndex !== null && synth.speaking) {
+                const savedIndex = activeIndex;
+                const savedLoop = isLoopingAll;
+                stopAudio();
+                isLoopingAll = savedLoop;
+                if (savedLoop) btnPlayAll.innerHTML = "<span>[一時停止中...]</span>";
+                speakSequence(savedIndex, savedLoop);
+            }
+        };
+
+        speedRange.oninput = () => {
+            const currentSpeed = parseFloat(speedRange.value).toFixed(2);
+            speedValue.textContent = `${currentSpeed}x`;
+        };
+
+        speedRange.onchange = () => {
+            if (activeIndex !== null && synth.speaking) {
+                const savedIndex = activeIndex;
+                const savedLoop = isLoopingAll;
+                stopAudio();
+                isLoopingAll = savedLoop;
+                if (savedLoop) btnPlayAll.innerHTML = "<span>[一時停止中...]</span>";
+                speakSequence(savedIndex, savedLoop);
+            }
+        };
+
+        const init = async () => {
+            setupFilenameAndKeys(); 
+            buildScriptUI();
+            buildStaticNotesUI(); 
+            await initFirebaseAndAuth();
+        };
+
+        window.onload = init;
+    </script>
+</body>
+</html>
